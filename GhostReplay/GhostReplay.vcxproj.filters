@@ -72,6 +72,21 @@
     </ClCompile>
     <ClCompile Include="Blip.cpp" />
     <ClCompile Include="ReplayVehicle.cpp" />
+    <ClCompile Include="..\thirdparty\minhook\src\buffer.c">
+      <Filter>ThirdParty\minhook</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\minhook\src\hook.c">
+      <Filter>ThirdParty\minhook</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\minhook\src\trampoline.c">
+      <Filter>ThirdParty\minhook</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\minhook\src\hde\hde32.c">
+      <Filter>ThirdParty\minhook\hde</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\minhook\src\hde\hde64.c">
+      <Filter>ThirdParty\minhook\hde</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Util">
@@ -100,6 +115,12 @@
     </Filter>
     <Filter Include="ThirdParty\pugixml">
       <UniqueIdentifier>{8b5dd6f0-a80c-4ac2-9d1a-f6f1ebc4e91b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty\minhook">
+      <UniqueIdentifier>{44ddc16e-1b40-4670-9c4f-30e613578f68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty\minhook\hde">
+      <UniqueIdentifier>{defe9789-076a-4527-88ef-687d6b58850f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -189,6 +210,27 @@
     <ClInclude Include="ReplayVehicle.hpp" />
     <ClInclude Include="Util\Misc.hpp">
       <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\minhook\src\buffer.h">
+      <Filter>ThirdParty\minhook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\minhook\src\trampoline.h">
+      <Filter>ThirdParty\minhook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\minhook\src\hde\hde32.h">
+      <Filter>ThirdParty\minhook\hde</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\minhook\src\hde\hde64.h">
+      <Filter>ThirdParty\minhook\hde</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\minhook\src\hde\pstdint.h">
+      <Filter>ThirdParty\minhook\hde</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\minhook\src\hde\table32.h">
+      <Filter>ThirdParty\minhook\hde</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\minhook\src\hde\table64.h">
+      <Filter>ThirdParty\minhook\hde</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

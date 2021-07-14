@@ -122,6 +122,8 @@ public:
 
     void TeleportToTrack(const CTrackData& trackData);
 
+    Vehicle GetPlayerVehicle() { return mPlayerVehicle; }
+
 protected:
     void updateGlobalStates();
     void updateReplay();
@@ -146,8 +148,6 @@ protected:
     void setPlayerIntoVehicleFreeSeat(Vehicle vehicle);
     // Called by ghost instance on cleanup when instance replay is reset, vehicle is its own vehicle.
     void ghostCleanup(Vehicle vehicle);
-
-    void updateIgnoredCollisions();
 
     double mCurrentTime;
 
@@ -186,4 +186,6 @@ protected:
     Vehicle mPassengerModePlayerVehicle = 0;
     bool mPassengerModPlayerVehicleManagedByThisScript = false;
     CReplayVehicle* mPassengerVehicle = nullptr;
+
+    Vehicle mPlayerVehicle = 0;
 };

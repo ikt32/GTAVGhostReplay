@@ -30,5 +30,8 @@ namespace GhostReplay {
 }
 
 namespace Dll {
+    void SetupHooks();
+    void ClearHooks();
+
     bool Unloading();
 }

@@ -44,12 +44,14 @@ BOOL APIENTRY DllMain(HMODULE hInstance, DWORD reason, LPVOID lpReserved) {
             scriptRegister(hInstance, GhostReplay::ScriptMain);
 
             logger.Write(INFO, "Script registered");
+            Dll::SetupHooks();
             break;
         }
         case DLL_PROCESS_DETACH: {
             Dll::unloading = true;
             GhostReplay::TriggerLoadStop();
             scriptUnregister(hInstance);
+            Dll::ClearHooks();
             break;
         }
         default:

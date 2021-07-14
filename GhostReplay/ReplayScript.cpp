@@ -47,6 +47,7 @@ CReplayScript::CReplayScript(
 CReplayScript::~CReplayScript() = default;
 
 void CReplayScript::Tick() {
+    mPlayerVehicle = PED::GET_VEHICLE_PED_IS_IN(PLAYER::PLAYER_PED_ID(), false);
     updateSteppedTime();
 
     switch(mScriptMode) {
@@ -715,7 +716,6 @@ void CReplayScript::updateReplay() {
     }
 
     updateGlobalStates();
-    updateIgnoredCollisions();
 
     Vehicle vehicle = PED::GET_VEHICLE_PED_IS_IN(PLAYER::PLAYER_PED_ID(), false);
     Vector3 nowPos;
@@ -763,6 +763,9 @@ void CReplayScript::updateReplay() {
             replayTime,
             !inGhostVehicle && startPassedThisTick,
             !inGhostVehicle && finishPassedThisTick);
+
+        // _DISABLE_CAM_COLLISION_FOR_ENTITY
+        CAM::_0x2AED6301F67007D5(replayVehicle->GetVehicle());
     }
 
     if (anyGhostLapTriggered) {
@@ -1072,35 +1075,4 @@ void CReplayScript::ghostCleanup(Vehicle vehicle) {
     }
 
     DeactivatePassengerMode(vehicle);
-}
-
-// TODO: Randomly fails to apply?
-void CReplayScript::updateIgnoredCollisions() {
-    Ped playerPed = PLAYER::PLAYER_PED_ID();
-    Vehicle playerVehicle = PED::GET_VEHICLE_PED_IS_IN(playerPed, false);
-
-    for (const auto& replayVehicle : mReplayVehicles) {
-        for (const auto& otherReplayVehicle : mReplayVehicles) {
-            if (otherReplayVehicle->GetVehicle() == replayVehicle->GetVehicle())
-                continue;
-            ENTITY::SET_ENTITY_NO_COLLISION_ENTITY(
-                replayVehicle->GetVehicle(),
-                otherReplayVehicle->GetVehicle(),
-                true);
-        }
-
-        if (playerVehicle != replayVehicle->GetVehicle() && ENTITY::DOES_ENTITY_EXIST(playerVehicle)) {
-            ENTITY::SET_ENTITY_NO_COLLISION_ENTITY(
-                replayVehicle->GetVehicle(),
-                playerVehicle,
-                true);
-            ENTITY::SET_ENTITY_NO_COLLISION_ENTITY(
-                playerVehicle,
-                replayVehicle->GetVehicle(),
-                true);
-        }
-
-        // _DISABLE_CAM_COLLISION_FOR_ENTITY
-        CAM::_0x2AED6301F67007D5(replayVehicle->GetVehicle());
-    }
 }
