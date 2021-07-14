@@ -758,14 +758,44 @@ void CReplayScript::updateReplay() {
 
     double replayTime = mReplayCurrentTime + mSettings.Replay.OffsetSeconds * 1000.0;
     bool anyGhostLapTriggered = false;
+    
+    float distMaxSq = std::numeric_limits<float>::max();
+    Vehicle camIgnoreVehicle = 0;
     for (const auto& replayVehicle : mReplayVehicles) {
         anyGhostLapTriggered |= replayVehicle->UpdatePlayback(
             replayTime,
             !inGhostVehicle && startPassedThisTick,
             !inGhostVehicle && finishPassedThisTick);
 
+        if (replayVehicle->GetReplayState() != EReplayState::Idle) {
+            Vector3 playerPos = ENTITY::GET_ENTITY_COORDS(mPlayerVehicle, true);
+            Vector3 ghostPos = ENTITY::GET_ENTITY_COORDS(replayVehicle->GetVehicle(), true);
+            float distSq = DistanceSq(playerPos, ghostPos);
+            if (distSq < distMaxSq) {
+                distMaxSq = distSq;
+                camIgnoreVehicle = replayVehicle->GetVehicle();
+            
+                if (mSettings.Main.Debug) {
+                    UI::DrawLine(playerPos, ghostPos, 255, 0, 0, 255);
+                    UI::ShowText3D((playerPos + ghostPos) * 0.5f, 10.0f, {
+                        fmt::format("{:.2f}m", Distance(playerPos, ghostPos)),
+                    });
+                }
+            }
+        }
+    }
+
+    // Still won't go right if it overlaps multiple vehicles, but this is *something*.
+    if (camIgnoreVehicle && Util::Intersects(camIgnoreVehicle, mPlayerVehicle)) {
+        // Only seems to apply for the last passed entity.
         // _DISABLE_CAM_COLLISION_FOR_ENTITY
-        CAM::_0x2AED6301F67007D5(replayVehicle->GetVehicle());
+        CAM::_0x2AED6301F67007D5(camIgnoreVehicle);
+    
+        if (mSettings.Main.Debug) {
+            Vector3 infoSpherePos = ENTITY::GET_ENTITY_COORDS(camIgnoreVehicle, true);
+            infoSpherePos.z += 2.5f;
+            UI::DrawSphere(infoSpherePos, 0.10f, 255, 0, 0, 255);
+        }
     }
 
     if (anyGhostLapTriggered) {
