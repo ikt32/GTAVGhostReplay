@@ -786,7 +786,7 @@ void CReplayScript::updateReplay() {
     }
 
     // Still won't go right if it overlaps multiple vehicles, but this is *something*.
-    if (camIgnoreVehicle && Util::Intersects(camIgnoreVehicle, mPlayerVehicle)) {
+    if (camIgnoreVehicle) {
         // Only seems to apply for the last passed entity.
         // _DISABLE_CAM_COLLISION_FOR_ENTITY
         CAM::_0x2AED6301F67007D5(camIgnoreVehicle);
