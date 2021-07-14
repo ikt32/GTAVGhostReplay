@@ -122,6 +122,7 @@
     <ClCompile Include="TrackData.cpp" />
     <ClCompile Include="TrackDataARS.cpp" />
     <ClCompile Include="Util\FileVersion.cpp" />
+    <ClCompile Include="Util\Game.cpp" />
     <ClCompile Include="Util\Inputs.cpp" />
     <ClCompile Include="Util\Logger.cpp" />
     <ClCompile Include="Util\Paths.cpp" />

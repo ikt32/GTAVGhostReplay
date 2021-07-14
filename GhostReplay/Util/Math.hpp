@@ -104,6 +104,17 @@ auto Distance(Vector3T vec1, Vector3T vec2) {
 }
 
 template <TVec3 Vector3T>
+auto LengthSq(Vector3T vec) {
+    return (vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+}
+
+template <TVec3 Vector3T>
+auto DistanceSq(Vector3T vec1, Vector3T vec2) {
+    Vector3T distance = vec1 - vec2;
+    return LengthSq(distance);
+}
+
+template <TVec3 Vector3T>
 auto Dot(Vector3T a, Vector3T b)  {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
@@ -264,4 +275,14 @@ inline Vector3 GetPerpendicular(Vector3 a, Vector3 b, float length, bool counter
         abCw.y = -ab.x;
     }
     return a + abCw * length;
+}
+
+inline bool ccw(Vector3 A, Vector3 B, Vector3 C) {
+    return (C.y - A.y) * (B.x - A.x) > (B.y - A.y) * (C.x - A.x);
+}
+
+// Return true if line segments AB and CD intersect
+// Only X,Y plane is checked
+inline bool Intersect(Vector3 A, Vector3 B, Vector3 C, Vector3 D) {
+    return ccw(A, C, D) != ccw(B, C, D) && ccw(A, B, C) != ccw(A, B, D);
 }
