@@ -4,6 +4,7 @@
 #include "Util/UI.hpp"
 #include "Util/Logger.hpp"
 #include "Util/Math.hpp"
+#include "Util/Game.hpp"
 #include "Memory/VehicleExtensions.hpp"
 #include <inc/natives.h>
 #include <fmt/format.h>
@@ -224,6 +225,15 @@ void CReplayVehicle::showNode(
     double deltaT = ((nodeNext->Timestamp - nodeCurr->Timestamp) * 0.001); // Seconds
     Vector3 pos = lerp(nodeCurr->Pos, nodeNext->Pos, progress);
     Vector3 rot = lerp(nodeCurr->Rot, nodeNext->Rot, progress, -180.0f, 180.0f);
+
+    if (mSettings.Main.Debug) {
+        Vector3 rotRad = {
+            deg2rad(rot.x), 0,
+            deg2rad(rot.y), 0,
+            deg2rad(rot.z), 0,
+        };
+        Util::DrawModelExtents(ENTITY::GET_ENTITY_MODEL(GetVehicle()), pos, rotRad, 255, 255, 255);
+    }
 
     auto posEntity = ENTITY::GET_ENTITY_COORDS(mReplayVehicle, !ENTITY::IS_ENTITY_DEAD(mReplayVehicle, false));
 
