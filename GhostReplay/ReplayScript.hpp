@@ -147,7 +147,8 @@ protected:
     // Called by ghost instance on cleanup when instance replay is reset, vehicle is its own vehicle.
     void ghostCleanup(Vehicle vehicle);
 
-    void updateIgnoredCollisions();
+    void updateIgnoredCollisions(double replayTime);
+    bool intersects(CReplayVehicle* a, CReplayVehicle* b);
 
     double mCurrentTime;
 

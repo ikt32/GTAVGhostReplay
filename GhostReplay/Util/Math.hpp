@@ -265,3 +265,13 @@ inline Vector3 GetPerpendicular(Vector3 a, Vector3 b, float length, bool counter
     }
     return a + abCw * length;
 }
+
+inline bool ccw(Vector3 A, Vector3 B, Vector3 C) {
+    return (C.y - A.y) * (B.x - A.x) > (B.y - A.y) * (C.x - A.x);
+}
+
+// Return true if line segments AB and CD intersect
+// Only X,Y plane is checked
+inline bool Intersect(Vector3 A, Vector3 B, Vector3 C, Vector3 D) {
+    return ccw(A, C, D) != ccw(B, C, D) && ccw(A, B, C) != ccw(A, B, D);
+}

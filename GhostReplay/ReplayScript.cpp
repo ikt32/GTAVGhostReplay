@@ -715,7 +715,6 @@ void CReplayScript::updateReplay() {
     }
 
     updateGlobalStates();
-    updateIgnoredCollisions();
 
     Vehicle vehicle = PED::GET_VEHICLE_PED_IS_IN(PLAYER::PLAYER_PED_ID(), false);
     Vector3 nowPos;
@@ -764,7 +763,7 @@ void CReplayScript::updateReplay() {
             !inGhostVehicle && startPassedThisTick,
             !inGhostVehicle && finishPassedThisTick);
     }
-
+    updateIgnoredCollisions(replayTime);
     if (anyGhostLapTriggered) {
         mReplayStartTime = gameTime;
     }
@@ -1074,33 +1073,95 @@ void CReplayScript::ghostCleanup(Vehicle vehicle) {
     DeactivatePassengerMode(vehicle);
 }
 
-// TODO: Randomly fails to apply?
-void CReplayScript::updateIgnoredCollisions() {
+void CReplayScript::updateIgnoredCollisions(double replayTime) {
     Ped playerPed = PLAYER::PLAYER_PED_ID();
     Vehicle playerVehicle = PED::GET_VEHICLE_PED_IS_IN(playerPed, false);
 
-    for (const auto& replayVehicle : mReplayVehicles) {
-        for (const auto& otherReplayVehicle : mReplayVehicles) {
-            if (otherReplayVehicle->GetVehicle() == replayVehicle->GetVehicle())
+    for (uint32_t i = 0; i < mReplayVehicles.size(); ++i) {
+        const auto& replayVehicle = mReplayVehicles[i];
+
+        if (replayVehicle->GetReplayState() == EReplayState::Idle)
+            continue;
+
+        bool intersectsAny = false;
+        for (uint32_t j = 0; j < mReplayVehicles.size(); ++j) {
+            const auto& otherReplayVehicle = mReplayVehicles[j];
+            if (i >= j)
                 continue;
-            ENTITY::SET_ENTITY_NO_COLLISION_ENTITY(
-                replayVehicle->GetVehicle(),
-                otherReplayVehicle->GetVehicle(),
-                true);
+
+            if (intersects(replayVehicle.get(), otherReplayVehicle.get())) {
+                intersectsAny = true;
+                break;
+            }
         }
 
+        if (mSettings.Main.Debug) {
+            Hash model = ENTITY::GET_ENTITY_MODEL(replayVehicle.get()->GetVehicle());
+            int r = 255, g = 255, b = 255;
+            if (intersectsAny) {
+                r = 255; g = 0; b = 0;
+            }
+            Util::DrawModelExtents(model, replayVehicle.get()->Pos(), replayVehicle.get()->Rot(), r, g, b);
+        }
+
+        if (intersectsAny) {
+            if (replayVehicle.get()->HasCollision()) {
+                replayVehicle.get()->UpdateCollision(false);
+            }
+        }
+        else {
+            if (!replayVehicle.get()->HasCollision()) {
+                replayVehicle.get()->UpdateCollision(true);
+            }
+        }
+    }
+
+    for (const auto& replayVehicle : mReplayVehicles) {
         if (playerVehicle != replayVehicle->GetVehicle() && ENTITY::DOES_ENTITY_EXIST(playerVehicle)) {
             ENTITY::SET_ENTITY_NO_COLLISION_ENTITY(
                 replayVehicle->GetVehicle(),
                 playerVehicle,
-                true);
-            ENTITY::SET_ENTITY_NO_COLLISION_ENTITY(
-                playerVehicle,
-                replayVehicle->GetVehicle(),
                 true);
         }
 
         // _DISABLE_CAM_COLLISION_FOR_ENTITY
         CAM::_0x2AED6301F67007D5(replayVehicle->GetVehicle());
     }
+}
+
+bool CReplayScript::intersects(CReplayVehicle* a, CReplayVehicle* b) {
+    Hash modelA = ENTITY::GET_ENTITY_MODEL(a->GetVehicle());
+    Hash modelB = ENTITY::GET_ENTITY_MODEL(b->GetVehicle());
+
+    Vector3 dimMinA, dimMaxA;
+    MISC::GET_MODEL_DIMENSIONS(modelA, &dimMinA, &dimMaxA);
+    Util::SBoxPoints boxA = Util::GetBoxPoints(a->Pos(), a->Rot(), RotationToDirection(a->Rot()), dimMinA, dimMaxA);
+
+    Vector3 dimMinB, dimMaxB;
+    MISC::GET_MODEL_DIMENSIONS(modelB, &dimMinB, &dimMaxB);
+    Util::SBoxPoints boxB = Util::GetBoxPoints(b->Pos(), b->Rot(), RotationToDirection(b->Rot()), dimMinB, dimMaxB);
+
+    bool intersected = false;
+
+    intersected = intersected || Intersect(boxA.Lfd, boxA.Rfd, boxB.Lfd, boxB.Rfd);
+    intersected = intersected || Intersect(boxA.Lfd, boxA.Rfd, boxB.Lrd, boxB.Rrd);
+    intersected = intersected || Intersect(boxA.Lfd, boxA.Rfd, boxB.Lfd, boxB.Lrd);
+    intersected = intersected || Intersect(boxA.Lfd, boxA.Rfd, boxB.Rfd, boxB.Rrd);
+
+    intersected = intersected || Intersect(boxA.Lrd, boxA.Rrd, boxB.Lfd, boxB.Rfd);
+    intersected = intersected || Intersect(boxA.Lrd, boxA.Rrd, boxB.Lrd, boxB.Rrd);
+    intersected = intersected || Intersect(boxA.Lrd, boxA.Rrd, boxB.Lfd, boxB.Lrd);
+    intersected = intersected || Intersect(boxA.Lrd, boxA.Rrd, boxB.Rfd, boxB.Rrd);
+
+    intersected = intersected || Intersect(boxA.Lfd, boxA.Lrd, boxB.Lfd, boxB.Rfd);
+    intersected = intersected || Intersect(boxA.Lfd, boxA.Lrd, boxB.Lrd, boxB.Rrd);
+    intersected = intersected || Intersect(boxA.Lfd, boxA.Lrd, boxB.Lfd, boxB.Lrd);
+    intersected = intersected || Intersect(boxA.Lfd, boxA.Lrd, boxB.Rfd, boxB.Rrd);
+
+    intersected = intersected || Intersect(boxA.Rfd, boxA.Rrd, boxB.Lfd, boxB.Rfd);
+    intersected = intersected || Intersect(boxA.Rfd, boxA.Rrd, boxB.Lrd, boxB.Rrd);
+    intersected = intersected || Intersect(boxA.Rfd, boxA.Rrd, boxB.Lfd, boxB.Lrd);
+    intersected = intersected || Intersect(boxA.Rfd, boxA.Rrd, boxB.Rfd, boxB.Rrd);
+
+    return intersected;
 }

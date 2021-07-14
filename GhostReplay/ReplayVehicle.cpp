@@ -28,12 +28,11 @@ CReplayVehicle::~CReplayVehicle() {
 }
 
 void CReplayVehicle::UpdateCollision(bool enable) {
-    if (enable) {
-        ENTITY::SET_ENTITY_COLLISION(mReplayVehicle, true, true);
-    }
-    else {
-        ENTITY::SET_ENTITY_COLLISION(mReplayVehicle, false, false);
-    }
+    ENTITY::SET_ENTITY_COLLISION(mReplayVehicle, enable, false);
+}
+
+bool CReplayVehicle::HasCollision() {
+    return !ENTITY::GET_ENTITY_COLLISION_DISABLED(mReplayVehicle);
 }
 
 bool CReplayVehicle::UpdatePlayback(double replayTime, bool startPassedThisTick, bool finishPassedThisTick) {
@@ -224,7 +223,8 @@ void CReplayVehicle::showNode(
     double deltaT = ((nodeNext->Timestamp - nodeCurr->Timestamp) * 0.001); // Seconds
     Vector3 pos = lerp(nodeCurr->Pos, nodeNext->Pos, progress);
     Vector3 rot = lerp(nodeCurr->Rot, nodeNext->Rot, progress, -180.0f, 180.0f);
-
+    mLastPos = pos;
+    mLastRot = rot;
     auto posEntity = ENTITY::GET_ENTITY_COORDS(mReplayVehicle, !ENTITY::IS_ENTITY_DEAD(mReplayVehicle, false));
 
     float dist = Distance(pos, posEntity);

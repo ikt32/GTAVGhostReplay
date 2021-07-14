@@ -45,7 +45,9 @@ namespace GhostReplay {
     const std::vector<std::string> syncOptions = { "Absolute", "Approximate" };
     const std::vector<std::vector<std::string>> syncDescriptions = {
         { "Absolute: Perfect playback, but lacks effects like tyre trails, dirt and smoke. Good for hotlaps." },
-        { "Approximate: Effects are present, but vehicle may get knocked off-course by terrain or props." },
+        { "Approximate: Playback through physics and effects are present, but vehicle may get knocked off-course "
+            "by terrain or props.",
+          "When ghosts collide, physics and effects are temporarily disabled." },
     };
     const std::vector<std::string> replaySortOptions = { "Name", "Lap time", "Date" };
     const std::vector<std::string> replaySortDescriptions = { 

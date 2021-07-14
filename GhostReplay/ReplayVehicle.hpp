@@ -2,6 +2,7 @@
 #include "Blip.hpp"
 #include "ReplayData.hpp"
 #include "ScriptSettings.hpp"
+#include "Util/Math.hpp"
 #include <inc/types.h>
 
 enum class EReplayState {
@@ -25,6 +26,15 @@ public:
     CReplayData* GetReplay() { return mActiveReplay; }
 
     void UpdateCollision(bool enable);
+    bool HasCollision();
+    Vector3 Pos() { return mLastPos; }
+    Vector3 Rot() {
+        return Vector3{
+            deg2rad(mLastRot.x), 0,
+            deg2rad(mLastRot.y), 0,
+            deg2rad(mLastRot.z), 0,
+        };
+    }
 
     // Returns true when the replay was (re)started this tick.
     bool UpdatePlayback(double replayTime, bool startPassedThisTick, bool finishPassedThisTick);
@@ -60,6 +70,9 @@ private:
     std::vector<SReplayNode>::iterator mLastNode;
 
     std::function<void(Vehicle)> mOnCleanup;
+
+    Vector3 mLastPos;
+    Vector3 mLastRot;
 
     void startReplay();
     void showNode(double replayTime,
