@@ -927,7 +927,7 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
 
         if (GetSettings().Replay.EnableDrivers) {
             std::vector<std::string> extra{
-                "Available driver models:",
+                "Fallback models:",
             };
 
             if (GetSettings().Replay.DriverModels.empty()) {
@@ -940,9 +940,9 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
             extra.push_back("");
             extra.push_back("Change or add models in settings_general.ini");
 
-            mbCtx.OptionPlus("Driver models", extra, nullptr, nullptr, nullptr, "Models",
-                { "Shows available models for the driver,",
-                  "randomly picks the model on spawning a replay vehicle." });
+            mbCtx.OptionPlus("Fallback models", extra, nullptr, nullptr, nullptr, "Models",
+                { "Uses these fallback models for drivers, if the recording doesn't have a driver.",
+                  "Model is randomly picked." });
         }
     });
 

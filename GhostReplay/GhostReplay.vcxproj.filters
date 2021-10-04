@@ -90,6 +90,7 @@
     <ClCompile Include="Util\Game.cpp">
       <Filter>Util</Filter>
     </ClCompile>
+    <ClCompile Include="ReplayDriver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Util">
@@ -238,5 +239,6 @@
     <ClInclude Include="Util\Random.hpp">
       <Filter>Util</Filter>
     </ClInclude>
+    <ClInclude Include="ReplayDriver.h" />
   </ItemGroup>
 </Project>

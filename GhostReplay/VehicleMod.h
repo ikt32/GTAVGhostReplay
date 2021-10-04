@@ -1,8 +1,8 @@
 #pragma once
 #include <inc/types.h>
+#include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
-#include <nlohmann/json.hpp>
 
 struct VehicleMod {
     enum class ModType {

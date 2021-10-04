@@ -443,7 +443,8 @@ void CReplayVehicle::createReplayVehicle(Hash model, CReplayData* activeReplay, 
 }
 
 void CReplayVehicle::createReplayPed() {
-    if (mSettings.Replay.DriverModels.empty()) {
+    if (mActiveReplay->ReplayDriver.Model == 0 &&
+        mSettings.Replay.DriverModels.empty()) {
         std::string msg = "Error: No ped models available, skipping ped creation.";
         UI::Notify(msg, false);
         logger.Write(ERROR, fmt::format("[Replay] {}", msg));
@@ -452,13 +453,36 @@ void CReplayVehicle::createReplayPed() {
     }
 
     random_selector selector{};
-    std::string modelName = selector(mSettings.Replay.DriverModels);
-    Hash model = MISC::GET_HASH_KEY(modelName.c_str());
-    int pedType = ePedType::PED_TYPE_CIVMALE;
-    if (!(STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_PED(model))) {
-        // Ped doesn't exist
+    Hash randomModel = MISC::GET_HASH_KEY(selector(mSettings.Replay.DriverModels).c_str());
+
+    Hash model = 0;
+    int pedType = 0;
+    bool validModel = false;
+    bool fallback = false;
+
+    if (mActiveReplay->ReplayDriver.Model &&
+        STREAMING::IS_MODEL_IN_CDIMAGE(mActiveReplay->ReplayDriver.Model) &&
+        STREAMING::IS_MODEL_A_PED(mActiveReplay->ReplayDriver.Model)) {
+
+        model = mActiveReplay->ReplayDriver.Model;
+        pedType = mActiveReplay->ReplayDriver.Type;
+        validModel = true;
+    }
+    
+    if (!validModel &&
+        STREAMING::IS_MODEL_IN_CDIMAGE(randomModel) &&
+        STREAMING::IS_MODEL_A_PED(randomModel)) {
+
+        model = randomModel;
+        pedType = ePedType::PED_TYPE_CIVMALE;
+        validModel = true;
+        fallback = true;
+    }
+    
+    if (!validModel) {
         std::string msg =
-            fmt::format("Error: Couldn't find ped model 0x{:08X}. Skipping ped creation.", model);
+            fmt::format("Error: Couldn't find ped model 0x{:08X} or 0x{:08X}. Skipping ped creation.",
+                mActiveReplay->ReplayDriver.Model, randomModel);
         UI::Notify(msg, false);
         logger.Write(ERROR, fmt::format("[Replay] {}", msg));
         mReplayPed = 0;
@@ -484,6 +508,9 @@ void CReplayVehicle::createReplayPed() {
 
     if (mReplayPed == 0)
         return;
+
+    if (!fallback)
+        ReplayDriverData::ApplyTo(mReplayPed, mActiveReplay->ReplayDriver);
 
     PED::SET_PED_CAN_BE_KNOCKED_OFF_VEHICLE(mReplayPed, eKnockOffVehicle::KNOCKOFFVEHICLE_NEVER);
     PED::SET_PED_CONFIG_FLAG(mReplayPed, 32, false);
