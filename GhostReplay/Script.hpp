@@ -18,6 +18,7 @@ namespace GhostReplay {
     uint32_t ReplaysTotal();
     std::string CurrentLoadingReplay();
 
+    void CreateDirectories();
     void LoadReplays();
     uint32_t LoadTracks();
     uint32_t LoadTrackImages();

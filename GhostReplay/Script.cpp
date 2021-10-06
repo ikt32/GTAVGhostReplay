@@ -146,6 +146,7 @@ void GhostReplay::ScriptMain() {
     settings->Load();
     logger.Write(INFO, "Settings loaded");
 
+    GhostReplay::CreateDirectories();
     GhostReplay::LoadReplays();
     GhostReplay::LoadTracks();
     GhostReplay::LoadARSTracks();
@@ -202,6 +203,32 @@ uint32_t GhostReplay::ReplaysTotal() {
 std::string GhostReplay::CurrentLoadingReplay() {
     std::lock_guard nameMutex(currentLoadingReplayMutex);
     return currentLoadingReplay;
+}
+
+void GhostReplay::CreateDirectories() {
+    const std::string replaysPath =
+        Paths::GetModuleFolder(Paths::GetOurModuleHandle()) +
+        Constants::ModDir +
+        "\\Replays";
+
+    const std::string tracksPath =
+        Paths::GetModuleFolder(Paths::GetOurModuleHandle()) +
+        Constants::ModDir +
+        "\\Tracks";
+
+    if (!(fs::exists(fs::path(replaysPath)) && fs::is_directory(fs::path(replaysPath)))) {
+        logger.Write(INFO, "[Replay] Creating missing directory [%s]", replaysPath.c_str());
+        if (!std::filesystem::create_directory(fs::path(replaysPath))) {
+            logger.Write(ERROR, "[Replay] Failed to create directory, replays will not be saved!");
+        }
+    }
+
+    if (!(fs::exists(fs::path(tracksPath)) && fs::is_directory(fs::path(tracksPath)))) {
+        logger.Write(INFO, "[Track] Creating missing directory [%s]", tracksPath.c_str());
+        if (!std::filesystem::create_directory(fs::path(tracksPath))) {
+            logger.Write(ERROR, "[Track] Failed to create directory, tracks will not be saved!");
+        }
+    }
 }
 
 void GhostReplay::LoadReplays() {
