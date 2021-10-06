@@ -1,6 +1,6 @@
 #pragma once
-#include "VehicleMod.h"
-#include "ReplayDriver.h"
+#include "VehicleMod.hpp"
+#include "ReplayDriver.hpp"
 
 #include <inc/types.h>
 #include <optional>

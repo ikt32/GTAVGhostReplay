@@ -1,8 +1,8 @@
 #include "ReplayScript.hpp"
 #include "Script.hpp"
-#include "VehicleMod.h"
+#include "VehicleMod.hpp"
 
-#include "Compatibility.h"
+#include "Compatibility.hpp"
 #include "Constants.hpp"
 #include "ReplayScriptUtils.hpp"
 

@@ -1,4 +1,4 @@
-#include "ReplayDriver.h"
+#include "ReplayDriver.hpp"
 #include <inc/natives.h>
 
 ReplayDriverData ReplayDriverData::LoadFrom(Ped ped) {

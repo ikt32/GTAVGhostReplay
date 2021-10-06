@@ -1,5 +1,5 @@
 #pragma once
-#include "../VehicleMod.h"
+#include "../VehicleMod.hpp"
 #include <inc/natives.h>
 
 namespace Util {

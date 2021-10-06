@@ -182,12 +182,12 @@
       <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="Script.hpp" />
-    <ClInclude Include="Compatibility.h">
+    <ClInclude Include="Compatibility.hpp">
       <Filter>Compatibility</Filter>
     </ClInclude>
     <ClInclude Include="ReplayData.hpp" />
     <ClInclude Include="ReplayScript.hpp" />
-    <ClInclude Include="VehicleMod.h" />
+    <ClInclude Include="VehicleMod.hpp" />
     <ClInclude Include="ScriptMenu.hpp">
       <Filter>Menu %28Generic%29</Filter>
     </ClInclude>
@@ -239,6 +239,6 @@
     <ClInclude Include="Util\Random.hpp">
       <Filter>Util</Filter>
     </ClInclude>
-    <ClInclude Include="ReplayDriver.h" />
+    <ClInclude Include="ReplayDriver.hpp" />
   </ItemGroup>
 </Project>

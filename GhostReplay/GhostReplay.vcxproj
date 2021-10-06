@@ -149,9 +149,9 @@
     <ClInclude Include="..\thirdparty\pugixml\src\pugiconfig.hpp" />
     <ClInclude Include="..\thirdparty\pugixml\src\pugixml.hpp" />
     <ClInclude Include="Blip.hpp" />
-    <ClInclude Include="Compatibility.h" />
+    <ClInclude Include="Compatibility.hpp" />
     <ClInclude Include="Image.hpp" />
-    <ClInclude Include="ReplayDriver.h" />
+    <ClInclude Include="ReplayDriver.hpp" />
     <ClInclude Include="ReplayData.hpp" />
     <ClInclude Include="Constants.hpp" />
     <ClInclude Include="Memory\NativeMemory.hpp" />
@@ -177,7 +177,7 @@
     <ClInclude Include="Util\Random.hpp" />
     <ClInclude Include="Util\String.hpp" />
     <ClInclude Include="Util\UI.hpp" />
-    <ClInclude Include="VehicleMod.h" />
+    <ClInclude Include="VehicleMod.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

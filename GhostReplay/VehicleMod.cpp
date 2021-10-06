@@ -1,4 +1,4 @@
-#include "VehicleMod.h"
+#include "VehicleMod.hpp"
 
 #include "Memory/Versions.hpp"
 

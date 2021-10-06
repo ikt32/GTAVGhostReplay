@@ -1,4 +1,4 @@
-#include "Compatibility.h"
+#include "Compatibility.hpp"
 #include "Script.hpp"
 #include "Util/Logger.hpp"
 

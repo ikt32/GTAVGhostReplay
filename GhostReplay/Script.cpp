@@ -3,7 +3,7 @@
 #include "ReplayScript.hpp"
 #include "ScriptMenu.hpp"
 #include "Constants.hpp"
-#include "Compatibility.h"
+#include "Compatibility.hpp"
 #include "Memory/VehicleExtensions.hpp"
 #include "Memory/NativeMemory.hpp"
 
