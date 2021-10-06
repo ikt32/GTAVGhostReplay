@@ -46,23 +46,23 @@ public:
     BYTE unk_9; // +318
 };
 
-static int32_t* _id_CPedHeadBlendData = nullptr;
+static uint32_t* _id_CPedHeadBlendData = nullptr;
 typedef uint64_t(*ExtensionList_get_t)(void* entity, uint64_t list);
 ExtensionList_get_t g_extensionList_get = nullptr;
 
 void Driver::SetupHeadBlendDataFunctions() {
     auto addr1 = mem::FindPattern("48 39 5E 38 74 1B 8B 15 ? ? ? ? 48 8D 4F 10 E8");
-    logger.Write(addr1 ? DEBUG : ERROR, "[Driver] addr1: %llX", addr1);
+    logger.Write(addr1 ? DEBUG : ERROR, "[Driver] addr1: 0x%llX", addr1);
 
     auto addr2 = mem::FindPattern("41 83 E0 1F 8B 44 81 08 44 0F A3 C0");
-    logger.Write(addr2 ? DEBUG : ERROR, "[Driver] addr2: %llX", addr2);
+    logger.Write(addr2 ? DEBUG : ERROR, "[Driver] addr2: 0x%llX", addr2);
 
     if (!addr1 || !addr2) {
         logger.Write(ERROR, "[Driver] Unable to retrieve head blend data");
         return;
     }
 
-    _id_CPedHeadBlendData = (int32_t*)((char*)addr1 + *(int*)((char*)addr1 + 8) + 12);
+    _id_CPedHeadBlendData = (uint32_t*)((char*)addr1 + *(int*)((char*)addr1 + 8) + 12);
     g_extensionList_get = (ExtensionList_get_t)(((char*)addr2 - 31));
 }
 
