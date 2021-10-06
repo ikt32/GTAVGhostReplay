@@ -98,6 +98,15 @@ SReplayDriverData SReplayDriverData::LoadFrom(Ped ped) {
         driverData.ComponentVariations.push_back(variationData);
     }
 
+    for (int componentId : { 0, 1, 2, 6, 7 }) {
+        SPedProp prop{
+            .ComponentId = componentId,
+            .Index = PED::GET_PED_PROP_INDEX(ped, componentId),
+            .TextureIndex = PED::GET_PED_PROP_TEXTURE_INDEX(ped, componentId),
+        };
+        driverData.Props.push_back(prop);
+    }
+
     SHeadBlendData headBlendData;
     bool hasHeadBlendData = PED::GET_PED_HEAD_BLEND_DATA(ped, &headBlendData);
     if (hasHeadBlendData) {
@@ -116,6 +125,13 @@ SReplayDriverData SReplayDriverData::LoadFrom(Ped ped) {
                     .HighlightId = pHeadBlendDataAdv->overlayHighlightId[i]
                 });
         }
+
+        driverData.HairColor = SHairColor{
+            .ColorId = pHeadBlendDataAdv->hairColour,
+            .HighlightColorId = pHeadBlendDataAdv->hairHighlight,
+        };
+
+        driverData.EyeColor = PED::_GET_PED_EYE_COLOR(ped);
     }
 
     return driverData;
@@ -126,6 +142,10 @@ void SReplayDriverData::ApplyTo(Ped ped, SReplayDriverData driverData) {
         PED::SET_PED_COMPONENT_VARIATION(ped,
             componentVariation.ComponentId, componentVariation.DrawableId,
             componentVariation.TextureId, componentVariation.PaletteId);
+    }
+
+    for (const auto& prop : driverData.Props) {
+        PED::SET_PED_PROP_INDEX(ped, prop.ComponentId, prop.Index, prop.TextureIndex, 2);
     }
 
     if (driverData.HeadBlendData != std::nullopt) {
@@ -145,5 +165,14 @@ void SReplayDriverData::ApplyTo(Ped ped, SReplayDriverData driverData) {
             PED::_SET_PED_HEAD_OVERLAY_COLOR(ped, i,
                 hod.ColorType, hod.ColorId, hod.HighlightId);
         }
+    }
+
+    if (driverData.HairColor != std::nullopt) {
+        PED::_SET_PED_HAIR_COLOR(ped, driverData.HairColor->ColorId,
+            driverData.HairColor->HighlightColorId);
+    }
+
+    if (driverData.EyeColor != std::nullopt) {
+        PED::_SET_PED_EYE_COLOR(ped, driverData.EyeColor.value());
     }
 }

@@ -15,6 +15,12 @@ struct SPedComponentVariationData {
     int PaletteId;
 };
 
+struct SPedProp {
+    int ComponentId;
+    int Index;
+    int TextureIndex;
+};
+
 struct SHeadBlendData {
     int Shape1;     int32_t pad0;
     int Shape2;     int32_t pad1;
@@ -35,12 +41,20 @@ struct SHeadOverlayData {
     int HighlightId;
 };
 
+struct SHairColor {
+    int ColorId;
+    int HighlightColorId;
+};
+
 struct SReplayDriverData {
     Hash Model;
     int Type;
     std::vector<SPedComponentVariationData> ComponentVariations;
+    std::vector<SPedProp> Props;
     std::optional<SHeadBlendData> HeadBlendData;
     std::optional<std::vector<SHeadOverlayData>> HeadOverlays;
+    std::optional<SHairColor> HairColor;
+    std::optional<int> EyeColor;
 
     static SReplayDriverData LoadFrom(Ped ped);
     static void ApplyTo(Ped ped, SReplayDriverData driverData);
