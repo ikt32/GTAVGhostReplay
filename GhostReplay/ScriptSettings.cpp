@@ -50,6 +50,7 @@ void CScriptSettings::Load() {
     LOAD_VAL("Replay", "OffsetSeconds", Replay.OffsetSeconds);
     LOAD_VAL("Replay", "VehicleAlpha", Replay.VehicleAlpha);
     LOAD_VAL("Replay", "ForceLights", Replay.ForceLights);
+    LOAD_VAL("Replay", "ForceRoof", Replay.ForceRoof);
 
     LOAD_VAL("Replay", "ScrubDistanceSeconds", Replay.ScrubDistanceSeconds);
     LOAD_VAL("Replay", "FallbackModel", Replay.FallbackModel);
@@ -77,6 +78,11 @@ void CScriptSettings::Load() {
     if (Replay.ForceLights < 0 || Replay.ForceLights > 2) {
         logger.Write(WARN, "[Settings] Replay.ForceLights: Invalid value '%d', using 0", Replay.ForceLights);
         Replay.ForceLights = 0;
+    }
+
+    if (Replay.ForceRoof < 0 || Replay.ForceRoof > 2) {
+        logger.Write(WARN, "[Settings] Replay.ForceRoof: Invalid value '%d', using 0", Replay.ForceRoof);
+        Replay.ForceRoof = 0;
     }
 
     if (syncType < 0 || syncType > ESyncTypeMax) {
@@ -112,6 +118,7 @@ void CScriptSettings::Save() {
     SAVE_VAL("Replay", "OffsetSeconds", Replay.OffsetSeconds);
     SAVE_VAL("Replay", "VehicleAlpha", Replay.VehicleAlpha);
     SAVE_VAL("Replay", "ForceLights", Replay.ForceLights);
+    SAVE_VAL("Replay", "ForceRoof", Replay.ForceRoof);
 
     SAVE_VAL("Replay", "ScrubDistanceSeconds", Replay.ScrubDistanceSeconds);
     SAVE_VAL("Replay", "FallbackModel", Replay.FallbackModel);

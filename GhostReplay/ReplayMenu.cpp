@@ -44,6 +44,7 @@ namespace GhostReplay {
     std::unordered_map<std::string, SFormattedTrackData> formattedTrackData;
 
     const std::vector<std::string> lightsOptions = { "Default", "Force Off", "Force On" };
+    const std::vector<std::string> roofOptions = { "Default", "Force Down", "Force Up" };
     const std::vector<std::string> syncOptions = { "Absolute", "Approximate" };
     const std::vector<std::vector<std::string>> syncDescriptions = {
         { "Absolute: Perfect playback, but lacks effects like tyre trails, dirt and smoke. Good for hotlaps." },
@@ -915,6 +916,11 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
                 { "Compensate for drift by pulling the vehicle to its intended position.",
                   "This value is the pull strength." });
         }
+
+        mbCtx.StringArray("Force roof state", roofOptions, GetSettings().Replay.ForceRoof,
+            { "Default: Replay roof as recorded.",
+              "Forced Down: Always put the roof down.",
+              "Forced Up: Always put the roof up.", });
 
         bool toggleDrivers = mbCtx.BoolOption("Enable drivers", GetSettings().Replay.EnableDrivers,
             { "Spawns drivers in the replay vehicles.",

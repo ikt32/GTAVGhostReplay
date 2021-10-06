@@ -378,6 +378,32 @@ void CReplayVehicle::showNode(
             VEHICLE::SET_VEHICLE_SIREN(mReplayVehicle, false);
     }
 
+    if (VEHICLE::IS_VEHICLE_A_CONVERTIBLE(mReplayVehicle, false)) {
+        auto roofState = VEHICLE::GET_CONVERTIBLE_ROOF_STATE(mReplayVehicle);
+        switch (mSettings.Replay.ForceRoof) {
+            case 2: // Force Up
+                if (roofState == 1 || roofState == 2)
+                    VEHICLE::RAISE_CONVERTIBLE_ROOF(mReplayVehicle, true);
+                break;
+            case 1: // Force Down
+                if (roofState == 0 || roofState == 3)
+                    VEHICLE::LOWER_CONVERTIBLE_ROOF(mReplayVehicle, true);
+                break;
+            case 0: // Default
+            default:
+                if (nodeCurr->Roof != std::nullopt) {
+                    if ((nodeCurr->Roof == 0 || nodeCurr->Roof == 3) &&
+                        (roofState == 1 || roofState == 2)) {
+                        VEHICLE::RAISE_CONVERTIBLE_ROOF(mReplayVehicle, false);
+                    }
+                    else if ((nodeCurr->Roof == 1 || nodeCurr->Roof == 2) &&
+                        (roofState == 0 || roofState == 3)) {
+                        VEHICLE::LOWER_CONVERTIBLE_ROOF(mReplayVehicle, false);
+                    }
+                }
+        }
+    }
+
     if (mReplayPed) {
         AUDIO::STOP_CURRENT_PLAYING_SPEECH(mReplayPed);
         AUDIO::STOP_CURRENT_PLAYING_AMBIENT_SPEECH(mReplayPed);
@@ -584,5 +610,28 @@ void CReplayVehicle::unhideVehicle() {
 
     if (VEHICLE::IS_THIS_MODEL_A_HELI(ENTITY::GET_ENTITY_MODEL(mReplayVehicle))) {
         VEHICLE::SET_HELI_BLADES_SPEED(mReplayVehicle, 1.0f);
+    }
+
+    // Force roof state to initial state
+    if (VEHICLE::IS_VEHICLE_A_CONVERTIBLE(mReplayVehicle, false)) {
+        switch (mSettings.Replay.ForceRoof) {
+            case 2: // Force Up
+                VEHICLE::RAISE_CONVERTIBLE_ROOF(mReplayVehicle, true);
+                break;
+            case 1: // Force Down
+                VEHICLE::LOWER_CONVERTIBLE_ROOF(mReplayVehicle, true);
+                break;
+            case 0: // Default
+            default:
+                if (mActiveReplay->Nodes[0].Roof != std::nullopt) {
+                    auto nodeRoofState = mActiveReplay->Nodes[0].Roof.value();
+                    if (nodeRoofState == 0 || nodeRoofState == 3) {
+                        VEHICLE::RAISE_CONVERTIBLE_ROOF(mReplayVehicle, true);
+                    }
+                    else if (nodeRoofState == 1 || nodeRoofState == 2) {
+                        VEHICLE::LOWER_CONVERTIBLE_ROOF(mReplayVehicle, true);
+                    }
+                }
+        }
     }
 }

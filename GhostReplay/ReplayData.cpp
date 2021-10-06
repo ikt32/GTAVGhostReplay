@@ -84,6 +84,9 @@ CReplayData CReplayData::Read(const std::string& replayFile) {
             if (jsonNode.contains("Siren"))
                 node.Siren = jsonNode.at("Siren").get<bool>();
 
+            if (jsonNode.contains("Roof"))
+                node.Roof = jsonNode.at("Roof").get<int>();
+
             replayData.Nodes.push_back(node);
         }
         logger.Write(DEBUG, "[Replay] Parsed %s", replayFile.c_str());
@@ -135,6 +138,8 @@ void CReplayData::write(bool pretty) {
             node.push_back({ "IndicatorRight", *Node.IndicatorRight });
         if (Node.Siren != std::nullopt)
             node.push_back({ "Siren", *Node.Siren });
+        if (Node.Roof != std::nullopt)
+            node.push_back({ "Roof", *Node.Roof });
 
         replayJson["Nodes"].push_back(node);
     }

@@ -26,6 +26,7 @@ struct SReplayNode {
     std::optional<bool> IndicatorLeft;
     std::optional<bool> IndicatorRight;
     std::optional<bool> Siren;
+    std::optional<int> Roof;
 
     bool operator<(const SReplayNode& other) const {
         return Timestamp < other.Timestamp;

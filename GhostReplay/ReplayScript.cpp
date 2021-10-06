@@ -942,6 +942,10 @@ bool CReplayScript::saveNode(double gameTime, SReplayNode& node, Vehicle vehicle
         node.Siren = VEHICLE::IS_VEHICLE_SIREN_ON(vehicle);
     }
 
+    if (VEHICLE::IS_VEHICLE_A_CONVERTIBLE(vehicle, false)) {
+        node.Roof = VEHICLE::GET_CONVERTIBLE_ROOF_STATE(vehicle);
+    }
+
     bool saved = false;
     double lastNodeTime = 0.0;
     if (!mCurrentRun.Nodes.empty()) {

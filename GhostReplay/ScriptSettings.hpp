@@ -44,6 +44,8 @@ public:
         int VehicleAlpha = 40;
         // 0: Default, 1: Force off, 2: Force on
         int ForceLights = 0;
+        // 0: Default, 1: Force down, 2: Force up
+        int ForceRoof = 0;
 
         // Advanced
         double ScrubDistanceSeconds = 1.0;
