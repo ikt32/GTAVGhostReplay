@@ -237,14 +237,15 @@ void GhostReplay::LoadReplays() {
 
     std::thread([replaysPath]() {
         for (const auto& file : pendingReplays) {
+            if (stopLoading) {
+                return;
+            }
+
             {
                 std::lock_guard nameMutex(currentLoadingReplayMutex);
                 currentLoadingReplay = std::filesystem::path(file).stem().string();
             }
 
-            if (stopLoading) {
-                return;
-            }
 
             CReplayData replay = CReplayData::Read(file);
             if (!replay.Nodes.empty()) {
