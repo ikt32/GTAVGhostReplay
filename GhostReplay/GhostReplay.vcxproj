@@ -165,7 +165,7 @@
     <ClInclude Include="ScriptMenu.hpp" />
     <ClInclude Include="ScriptSettings.hpp" />
     <ClInclude Include="Script.hpp" />
-    <ClInclude Include="SettingsCommon.h" />
+    <ClInclude Include="SettingsCommon.hpp" />
     <ClInclude Include="TrackData.hpp" />
     <ClInclude Include="Util\FileVersion.hpp" />
     <ClInclude Include="Util\Game.hpp" />

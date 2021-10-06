@@ -1,5 +1,5 @@
 #include "ScriptSettings.hpp"
-#include "SettingsCommon.h"
+#include "SettingsCommon.hpp"
 
 #include "Util/Logger.hpp"
 #include "Util/Misc.hpp"

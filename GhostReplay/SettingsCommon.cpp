@@ -1,4 +1,4 @@
-#include "SettingsCommon.h"
+#include "SettingsCommon.hpp"
 
 void SetValue(CSimpleIniA& ini, const char* section, const char* key, int val) {
     ini.SetLongValue(section, key, val);

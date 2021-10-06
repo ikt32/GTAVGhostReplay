@@ -196,7 +196,7 @@
     </ClInclude>
     <ClInclude Include="TrackData.hpp" />
     <ClInclude Include="ReplayScriptUtils.hpp" />
-    <ClInclude Include="SettingsCommon.h" />
+    <ClInclude Include="SettingsCommon.hpp" />
     <ClInclude Include="Image.hpp" />
     <ClInclude Include="..\thirdparty\jpegsize\jpegsize.h">
       <Filter>ThirdParty\jpegsize</Filter>
