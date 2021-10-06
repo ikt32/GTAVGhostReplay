@@ -60,6 +60,32 @@ struct SReplayDriverData {
     static void ApplyTo(Ped ped, SReplayDriverData driverData);
 };
 
+inline void to_json(nlohmann::ordered_json& j, const SPedProp& prop) {
+    j = nlohmann::ordered_json{
+        { "ComponentId", prop.ComponentId },
+        { "Index", prop.Index },
+        { "TextureIndex", prop.TextureIndex },
+    };
+}
+
+inline void from_json(const nlohmann::ordered_json& j, SPedProp& prop) {
+    j.at("ComponentId").get_to(prop.ComponentId);
+    j.at("Index").get_to(prop.Index);
+    j.at("TextureIndex").get_to(prop.TextureIndex);
+}
+
+inline void to_json(nlohmann::ordered_json& j, const SHairColor& hairColor) {
+    j = nlohmann::ordered_json{
+        { "ColorId", hairColor.ColorId },
+        { "HighlightColorId", hairColor.HighlightColorId },
+    };
+}
+
+inline void from_json(const nlohmann::ordered_json& j, SHairColor& hairColor) {
+    j.at("ColorId").get_to(hairColor.ColorId);
+    j.at("HighlightColorId").get_to(hairColor.HighlightColorId);
+}
+
 inline void to_json(nlohmann::ordered_json& j, const SHeadOverlayData& hod) {
     j = nlohmann::ordered_json{
         { "Value", hod.Value },
@@ -125,6 +151,7 @@ inline void to_json(nlohmann::ordered_json& j, const SReplayDriverData& replayDr
         { "Model", replayDriver.Model },
         { "Type", replayDriver.Type },
         { "ComponentVariations", replayDriver.ComponentVariations },
+        { "Props", replayDriver.Props },
     };
 
     if (replayDriver.HeadBlendData != std::nullopt)
@@ -132,13 +159,20 @@ inline void to_json(nlohmann::ordered_json& j, const SReplayDriverData& replayDr
 
     if (replayDriver.HeadOverlays != std::nullopt)
         j.push_back({ "HeadOverlays", replayDriver.HeadOverlays.value() });
+
+    if (replayDriver.HairColor != std::nullopt)
+        j.push_back({ "HairColor", replayDriver.HairColor.value() });
+    
+    if (replayDriver.EyeColor != std::nullopt)
+        j.push_back({ "EyeColor", replayDriver.EyeColor.value() });
 }
 
 inline void from_json(const nlohmann::ordered_json& j, SReplayDriverData& replayDriver) {
     j.at("Model").get_to(replayDriver.Model);
     j.at("Type").get_to(replayDriver.Type);
     j.at("ComponentVariations").get_to(replayDriver.ComponentVariations);
-    
+    j.at("Props").get_to(replayDriver.Props);
+
     if (j.contains("HeadBlendData")) {
         SHeadBlendData hbd = j.value("HeadBlendData", SHeadBlendData());
         replayDriver.HeadBlendData.emplace(hbd);
@@ -147,5 +181,15 @@ inline void from_json(const nlohmann::ordered_json& j, SReplayDriverData& replay
     if (j.contains("HeadOverlays")) {
         std::vector<SHeadOverlayData> hod = j.value("HeadOverlays", std::vector<SHeadOverlayData>());
         replayDriver.HeadOverlays.emplace(hod);
+    }
+
+    if (j.contains("HairColor")) {
+        SHairColor hairColor = j.value("HairColor", SHairColor());
+        replayDriver.HairColor.emplace(hairColor);
+    }
+
+    if (j.contains("EyeColor")) {
+        int eyeColor = j.value("EyeColor", 0);
+        replayDriver.EyeColor.emplace(eyeColor);
     }
 }
