@@ -165,6 +165,11 @@
     <ClInclude Include="ScriptMenu.hpp" />
     <ClInclude Include="ScriptSettings.hpp" />
     <ClInclude Include="Script.hpp" />
+    <ClInclude Include="Serializables\HairColor.hpp" />
+    <ClInclude Include="Serializables\HeadBlendData.hpp" />
+    <ClInclude Include="Serializables\HeadOverlayData.hpp" />
+    <ClInclude Include="Serializables\PedComponentVariationData.hpp" />
+    <ClInclude Include="Serializables\PedProp.hpp" />
     <ClInclude Include="SettingsCommon.hpp" />
     <ClInclude Include="TrackData.hpp" />
     <ClInclude Include="Util\FileVersion.hpp" />

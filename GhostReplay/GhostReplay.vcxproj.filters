@@ -126,6 +126,9 @@
     <Filter Include="ThirdParty\minhook\hde">
       <UniqueIdentifier>{defe9789-076a-4527-88ef-687d6b58850f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Serializables">
+      <UniqueIdentifier>{86d31452-7b39-4e09-90bc-37293cb35417}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Memory\NativeMemory.hpp">
@@ -240,5 +243,20 @@
       <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="ReplayDriver.hpp" />
+    <ClInclude Include="Serializables\PedComponentVariationData.hpp">
+      <Filter>Serializables</Filter>
+    </ClInclude>
+    <ClInclude Include="Serializables\PedProp.hpp">
+      <Filter>Serializables</Filter>
+    </ClInclude>
+    <ClInclude Include="Serializables\HeadBlendData.hpp">
+      <Filter>Serializables</Filter>
+    </ClInclude>
+    <ClInclude Include="Serializables\HeadOverlayData.hpp">
+      <Filter>Serializables</Filter>
+    </ClInclude>
+    <ClInclude Include="Serializables\HairColor.hpp">
+      <Filter>Serializables</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
