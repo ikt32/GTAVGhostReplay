@@ -44,7 +44,7 @@ CReplayData CReplayData::Read(const std::string& replayFile) {
         replayData.Track = replayJson["Track"];
         replayData.VehicleModel = replayJson["VehicleModel"];
         replayData.VehicleMods = replayJson.value("Mods", VehicleModData());
-        replayData.ReplayDriver = replayJson.value("Driver", ReplayDriverData());
+        replayData.ReplayDriver = replayJson.value("Driver", SReplayDriverData());
 
         for (auto& jsonNode : replayJson["Nodes"]) {
             SReplayNode node{};

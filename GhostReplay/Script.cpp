@@ -4,6 +4,8 @@
 #include "ScriptMenu.hpp"
 #include "Constants.hpp"
 #include "Compatibility.hpp"
+#include "ReplayDriver.hpp"
+
 #include "Memory/VehicleExtensions.hpp"
 #include "Memory/NativeMemory.hpp"
 
@@ -85,6 +87,8 @@ bool ShouldFindImpactsHook(uint64_t a1, uint64_t a2) {
 }
 
 void Dll::SetupHooks() {
+    Driver::SetupHeadBlendDataFunctions();
+
     auto addr = mem::FindPattern("48 8B C4 48 89 58 08 48 89 68 10 48 89 70 18 48 89 78 20 41 56 48 83 EC 20 48 8B EA 4C 8B F1 E8 ? ? ? ? 33 DB");
     if (!addr) {
         logger.Write(ERROR, "Couldn't find ShouldFindImpacts");

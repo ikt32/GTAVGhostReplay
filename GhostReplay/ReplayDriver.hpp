@@ -4,7 +4,9 @@
 #include <optional>
 #include <vector>
 
-void setupHeadBlendDataFunctions();
+namespace Driver {
+    void SetupHeadBlendDataFunctions();
+}
 
 struct SPedComponentVariationData {
     int ComponentId;

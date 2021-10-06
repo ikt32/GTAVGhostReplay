@@ -902,7 +902,7 @@ void CReplayScript::startRecord(double gameTime, Vehicle vehicle) {
     mCurrentRun.VehicleMods = modData;
 
     Ped driver = VEHICLE::GET_PED_IN_VEHICLE_SEAT(vehicle, -1, false);
-    ReplayDriverData driverData = ReplayDriverData::LoadFrom(driver);
+    SReplayDriverData driverData = SReplayDriverData::LoadFrom(driver);
     mCurrentRun.ReplayDriver = driverData;
 
     //UI::Notify("Record started", false);

@@ -49,7 +49,7 @@ public:
 
     Hash VehicleModel;
     VehicleModData VehicleMods;
-    ReplayDriverData ReplayDriver;
+    SReplayDriverData ReplayDriver;
 
     // Nodes.front() shall be used to figure out which CReplayDatas apply to a given starting point.
     // The menu shall be used to select the one that applies, so multiple CReplayData recordings can be

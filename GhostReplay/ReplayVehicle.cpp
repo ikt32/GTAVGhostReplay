@@ -510,7 +510,7 @@ void CReplayVehicle::createReplayPed() {
         return;
 
     if (!fallback)
-        ReplayDriverData::ApplyTo(mReplayPed, mActiveReplay->ReplayDriver);
+        SReplayDriverData::ApplyTo(mReplayPed, mActiveReplay->ReplayDriver);
 
     PED::SET_PED_CAN_BE_KNOCKED_OFF_VEHICLE(mReplayPed, eKnockOffVehicle::KNOCKOFFVEHICLE_NEVER);
     PED::SET_PED_CONFIG_FLAG(mReplayPed, 32, false);

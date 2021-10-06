@@ -9839,7 +9839,7 @@ namespace PED
 	//         int skinFirst, skinSecond, skinThird; 
 	//    float shapeMix, skinMix, thirdMix;
 	// } headBlendData;
-	static BOOL GET_PED_HEAD_BLEND_DATA(Ped ped, Any* headBlendData) { return invoke<BOOL>(0x2746BD9D88C5C5D0, ped, headBlendData); } // 0x2746BD9D88C5C5D0 0x44E1680C b323
+	static BOOL GET_PED_HEAD_BLEND_DATA(Ped ped, void* headBlendData) { return invoke<BOOL>(0x2746BD9D88C5C5D0, ped, headBlendData); } // 0x2746BD9D88C5C5D0 0x44E1680C b323
 	// See SET_PED_HEAD_BLEND_DATA().
 	static void UPDATE_PED_HEAD_BLEND_DATA(Ped ped, float shapeMix, float skinMix, float thirdMix) { invoke<Void>(0x723538F61C647C5A, ped, shapeMix, skinMix, thirdMix); } // 0x723538F61C647C5A 0x5CB76219 b323
 	// Used for freemode (online) characters.
