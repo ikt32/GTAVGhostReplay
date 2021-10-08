@@ -53,7 +53,9 @@ inline void from_json(const nlohmann::ordered_json& j, SReplayDriverData& replay
     j.at("Model").get_to(replayDriver.Model);
     j.at("Type").get_to(replayDriver.Type);
     j.at("ComponentVariations").get_to(replayDriver.ComponentVariations);
-    j.at("Props").get_to(replayDriver.Props);
+
+    if (j.contains("Props"))
+        j.at("Props").get_to(replayDriver.Props);
 
     if (j.contains("HeadBlendData")) {
         SHeadBlendData hbd = j.value("HeadBlendData", SHeadBlendData());
