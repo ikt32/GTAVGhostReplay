@@ -112,8 +112,8 @@ void CReplayScript::SetTrack(const std::string& trackName) {
         if (mSettings.Replay.AutoLoadGhost) {
             Vehicle vehicle = PED::GET_VEHICLE_PED_IS_IN(PLAYER::PLAYER_PED_ID(), false);
             auto fastestReplay = GetFastestReplay(trackName, ENTITY::GET_ENTITY_MODEL(vehicle));
-            if (!fastestReplay.Name.empty() && ENTITY::DOES_ENTITY_EXIST(vehicle)) {
-                SelectReplay(fastestReplay.Name, fastestReplay.Timestamp);
+            if (fastestReplay != nullptr && ENTITY::DOES_ENTITY_EXIST(vehicle)) {
+                SelectReplay(fastestReplay->Name, fastestReplay->Timestamp);
             }
         }
         return;
@@ -128,10 +128,11 @@ void CReplayScript::SelectReplay(const std::string& replayName, unsigned long lo
         bool timeOK = timestamp == 0 ? true : replay->Timestamp == timestamp;
 
         if (nameOK && timeOK) {
-            if (!replay->FullyParsed)
-                *replay = replay->Read(replay->FileName(), true);
+            if (!replay->FullyParsed()) {
+                replay->CompleteRead();
+            }
 
-            mActiveReplays.push_back(&*replay);
+            mActiveReplays.push_back(replay);
             mReplayVehicles.push_back(std::make_unique<CReplayVehicle>(mSettings, &*replay,
                 std::bind(static_cast<void(CReplayScript::*)(int)>(&CReplayScript::ghostCleanup),
                     this, std::placeholders::_1)));
@@ -163,7 +164,7 @@ void CReplayScript::SelectReplay(const std::string& replayName, unsigned long lo
 
 void CReplayScript::DeselectReplay(const std::string& replayName, unsigned long long timestamp) {
     auto replayIt = std::find_if(mActiveReplays.begin(), mActiveReplays.end(),
-        [&](const CReplayData* activeReplay) {
+        [&](const auto activeReplay) {
             return activeReplay->Name == replayName &&
                 activeReplay->Timestamp == timestamp;
         }
@@ -221,16 +222,16 @@ void CReplayScript::AddCompatibleReplay(const CReplayData& value) {
 }
 
 bool CReplayScript::IsFastestLap(const std::string& trackName, Hash vehicleModel, double timestamp) {
-    CReplayData fastestReplay = GetFastestReplay(trackName, vehicleModel);
+    auto fastestReplay = GetFastestReplay(trackName, vehicleModel);
 
-    if (!fastestReplay.Name.empty())
-        return timestamp < fastestReplay.Nodes.back().Timestamp;
+    if (fastestReplay != nullptr)
+        return timestamp < fastestReplay->Nodes.back().Timestamp;
 
     return false;
 }
 
-CReplayData CReplayScript::GetFastestReplay(const std::string& trackName, Hash vehicleModel) {
-    CReplayData fastestReplay("");
+std::shared_ptr<CReplayData> CReplayScript::GetFastestReplay(const std::string& trackName, Hash vehicleModel) {
+    std::shared_ptr<CReplayData> fastestReplay = nullptr;
 
     for (auto& replay : mReplays) {
         if (replay->Track != trackName)
@@ -239,9 +240,9 @@ CReplayData CReplayScript::GetFastestReplay(const std::string& trackName, Hash v
         if (vehicleModel != 0 && replay->VehicleModel != vehicleModel)
             continue;
 
-        if (fastestReplay.Nodes.empty() ||
-            replay->Nodes.back().Timestamp < fastestReplay.Nodes.back().Timestamp) {
-            fastestReplay = *replay;
+        if (fastestReplay == nullptr ||
+            replay->Nodes.back().Timestamp < fastestReplay->Nodes.back().Timestamp) {
+            fastestReplay = replay;
         }
     }
     return fastestReplay;
@@ -970,7 +971,7 @@ void CReplayScript::finishRecord(bool saved, const SReplayNode& node) {
     bool fasterLap = false;
 
     if (!mActiveReplays.empty()) {
-        CReplayData* fastestActiveReplay = getFastestActiveReplay();
+        auto fastestActiveReplay = getFastestActiveReplay();
         if (fastestActiveReplay)
             fasterLap = node.Timestamp < fastestActiveReplay->Nodes.back().Timestamp;
     }
@@ -982,7 +983,7 @@ void CReplayScript::finishRecord(bool saved, const SReplayNode& node) {
     }
 
     // "FullyParsed" is a lie, it just means it contains all data
-    mCurrentRun.FullyParsed = true;
+    mCurrentRun.SetFullyParsed(true);
 
     if (mSettings.Record.AutoGhost && (mActiveReplays.empty() || fasterLap)) {
         // Just deselect when there's 1 ghost, otherwise keep adding to the mayhem!
@@ -1010,8 +1011,8 @@ void CReplayScript::finishRecord(bool saved, const SReplayNode& node) {
     }
 }
 
-CReplayData* CReplayScript::getFastestActiveReplay() {
-    CReplayData* fastestReplay = nullptr;
+std::shared_ptr<CReplayData> CReplayScript::getFastestActiveReplay() {
+    std::shared_ptr<CReplayData> fastestReplay = nullptr;
     double fastestTime = std::numeric_limits<double>::max();
 
     for (auto& replay : mActiveReplays) {
@@ -1023,8 +1024,8 @@ CReplayData* CReplayScript::getFastestActiveReplay() {
     return fastestReplay;
 }
 
-CReplayData* CReplayScript::getSlowestActiveReplay() {
-    CReplayData* slowestReplay = nullptr;
+std::shared_ptr<CReplayData> CReplayScript::getSlowestActiveReplay() {
+    std::shared_ptr<CReplayData> slowestReplay = nullptr;
     double slowestTime = 0.0;
 
     for (auto& replay : mActiveReplays) {
@@ -1037,7 +1038,7 @@ CReplayData* CReplayScript::getSlowestActiveReplay() {
 }
 
 void CReplayScript::updateSlowestReplay() {
-    auto* slowestReplay = getSlowestActiveReplay();
+    auto slowestReplay = getSlowestActiveReplay();
     if (slowestReplay)
         mSlowestReplayTime = slowestReplay->Nodes.back().Timestamp;
     else

@@ -435,7 +435,7 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
             bool currentReplay = false;
             const auto& activeReplays = context.ActiveReplays();
             currentReplay = std::find_if(activeReplays.begin(), activeReplays.end(),
-                [&](const CReplayData* activeReplay) {
+                [&](const auto activeReplay) {
                     return activeReplay->Name == replay->Name &&
                         activeReplay->Timestamp == replay->Timestamp;
                 }
@@ -498,6 +498,7 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
                     Util::GetVehicleName(replay->VehicleModel)),
                 fmt::format("Time: {}",  Util::FormatMillisTime(replay->Nodes.back().Timestamp)),
                 fmt::format("Lap recorded: {}", datetime),
+                fmt::format("{}", replay->FullyParsed() ? "Loaded/Ready!" : currentReplay ? "Loading..." : "Not loaded yet."),
             };
 
             if (mbCtx.OptionPlus(optionName, extras, nullptr, clearDeleteFlag, deleteFlag, "Ghost", description)) {
@@ -968,12 +969,12 @@ const std::vector<std::string>& GhostReplay::FormatTrackData(NativeMenu::Menu& m
         }
     }
 
-    CReplayData fastestReplayInfo = context.GetFastestReplay(track.Name, 0);
+    auto fastestReplayInfo = context.GetFastestReplay(track.Name, 0);
     std::string lapRecordString = "No times set";
-    if (!fastestReplayInfo.Name.empty()) {
+    if (fastestReplayInfo != nullptr) {
         lapRecordString = fmt::format("{} ({})",
-            Util::FormatMillisTime(fastestReplayInfo.Nodes.back().Timestamp),
-            Util::GetVehicleName(fastestReplayInfo.VehicleModel));
+            Util::FormatMillisTime(fastestReplayInfo->Nodes.back().Timestamp),
+            Util::GetVehicleName(fastestReplayInfo->VehicleModel));
     }
 
     auto imgStr = context.GetTrackImageMenuString(track.Name);

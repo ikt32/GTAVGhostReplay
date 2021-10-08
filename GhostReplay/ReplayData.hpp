@@ -6,6 +6,7 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include <mutex>
 
 struct SReplayNode {
     double Timestamp;
@@ -40,10 +41,45 @@ public:
     static void WriteMetadataSync(CReplayData& replayData);
 
     CReplayData(std::string fileName);
+
+    // Copy constructor - skip mutex
+    CReplayData(const CReplayData& obj) {
+        MarkedForDeletion = obj.MarkedForDeletion;
+        Timestamp = obj.Timestamp;
+        Name = obj.Name;
+        Track = obj.Track;
+        VehicleModel = obj.VehicleModel;
+        VehicleMods = obj.VehicleMods;
+        ReplayDriver = obj.ReplayDriver;
+        Nodes = obj.Nodes;
+
+        mFileName = obj.mFileName;
+        mFullyParsed = obj.mFullyParsed;
+    }
+
+    // Move constructor - skip mutex
+    CReplayData& operator=(const CReplayData&& obj) {
+        MarkedForDeletion = obj.MarkedForDeletion;
+        Timestamp = obj.Timestamp;
+        Name = obj.Name;
+        Track = obj.Track;
+        VehicleModel = obj.VehicleModel;
+        VehicleMods = obj.VehicleMods;
+        ReplayDriver = obj.ReplayDriver;
+        Nodes = obj.Nodes;
+
+        mFileName = obj.mFileName;
+        mFullyParsed = obj.mFullyParsed;
+
+        return *this;
+    }
+
     std::string FileName() const { return mFileName; }
     void Delete() const;
+    void CompleteRead();
 
-    bool FullyParsed;
+    bool FullyParsed();
+    void SetFullyParsed(bool newValue);
 
     bool MarkedForDeletion;
 
@@ -58,6 +94,10 @@ public:
     // Nodes.front() shall be used to figure out which CReplayDatas apply to a given starting point.
     // The menu shall be used to select the one that applies, so multiple CReplayData recordings can be
     // chosen from.
+
+    // TODO: Node access while not completely loaded -> Crash
+    // Needs a mutex, but then things are slow again.
+    // Could *not* start a replay when still loading if the player triggers a start?
     std::vector<SReplayNode> Nodes;
 private:
     // Make sure mFileName has been set before calling this.
@@ -67,5 +107,10 @@ private:
     // Only run this before asynchronously calling write().
     void generateFileName();
 
+    void read();
+
     std::string mFileName;
+
+    std::mutex mFullyParsedMtx;
+    bool mFullyParsed;
 };

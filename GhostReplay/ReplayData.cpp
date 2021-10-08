@@ -37,7 +37,7 @@ CReplayData CReplayData::Read(const std::string& replayFile, bool full) {
         if (!metaFileStream.is_open()) {
             logger.Write(WARN, "[Meta] Failed to open %s, generating one and returning stuff", metaFileName.c_str());
             CReplayData fullData = Read(replayFile, true);
-            if (fullData.FullyParsed)
+            if (fullData.FullyParsed())
                 WriteMetadataSync(fullData);
             return fullData;
         }
@@ -125,7 +125,7 @@ CReplayData CReplayData::Read(const std::string& replayFile, bool full) {
 
             replayData.Nodes.push_back(node);
         }
-        replayData.FullyParsed = true;
+        replayData.SetFullyParsed(true);
         logger.Write(DEBUG, "[Replay] Parsed %s", replayFile.c_str());
         return replayData;
     }
@@ -136,11 +136,11 @@ CReplayData CReplayData::Read(const std::string& replayFile, bool full) {
 }
 
 CReplayData::CReplayData(std::string fileName)
-    : FullyParsed(false)
-    , MarkedForDeletion(false)
+    : MarkedForDeletion(false)
     , Timestamp(0)
     , VehicleModel(0)
-    , mFileName(std::move(fileName)) {}
+    , mFileName(std::move(fileName))
+    , mFullyParsed(false) {}
 
 void CReplayData::write(bool pretty) {
     nlohmann::ordered_json replayJson;
@@ -250,6 +250,76 @@ void CReplayData::generateFileName() {
     mFileName = fmt::format("{}\\{}{}.json", replaysPath, cleanName, suffix);
 }
 
+void CReplayData::read() {
+    // Assume the base data already filled in, no overwrite it.
+    CReplayData& replayData(*this);
+
+    nlohmann::ordered_json replayJson;
+    std::ifstream replayFileStream(mFileName.c_str());
+    if (!replayFileStream.is_open()) {
+        logger.Write(ERROR, "[Replay-2] Failed to open %s", mFileName.c_str());
+        return;
+    }
+
+    try {
+        replayFileStream >> replayJson;
+
+        replayData.VehicleMods = replayJson.value("Mods", VehicleModData());
+        replayData.ReplayDriver = replayJson.value("Driver", SReplayDriverData());
+
+        replayData.Nodes.clear();
+
+        for (auto& jsonNode : replayJson["Nodes"]) {
+            SReplayNode node{};
+            node.Timestamp = jsonNode["T"];
+            if (jsonNode.find("PX") == jsonNode.end()) {
+                node.Pos = jsonNode["Pos"];
+                node.Rot = jsonNode["Rot"];
+            }
+            else {
+                node.Pos.x = jsonNode["PX"];
+                node.Pos.y = jsonNode["PY"];
+                node.Pos.z = jsonNode["PZ"];
+                node.Rot.x = jsonNode["RX"];
+                node.Rot.y = jsonNode["RY"];
+                node.Rot.z = jsonNode["RZ"];
+            }
+            node.WheelRotations = jsonNode.value("WheelRotations", std::vector<float>());
+            node.SuspensionCompressions = jsonNode.value("SuspensionCompressions", std::vector<float>());
+            node.SteeringAngle = jsonNode.value("Steering", 0.0f);
+            node.Throttle = jsonNode.value("Throttle", 0.0f);
+            node.Brake = jsonNode.value("Brake", 0.0f);
+            node.Gear = jsonNode.value("Gear", -1);
+            node.RPM = jsonNode.value("RPM", -1.0f);
+
+            if (jsonNode.contains("LowBeams"))
+                node.LowBeams = jsonNode.at("LowBeams").get<bool>();
+
+            if (jsonNode.contains("HighBeams"))
+                node.HighBeams = jsonNode.at("HighBeams").get<bool>();
+
+            if (jsonNode.contains("IndicatorLeft"))
+                node.IndicatorLeft = jsonNode.at("IndicatorLeft").get<bool>();
+
+            if (jsonNode.contains("IndicatorRight"))
+                node.IndicatorRight = jsonNode.at("IndicatorRight").get<bool>();
+
+            if (jsonNode.contains("Siren"))
+                node.Siren = jsonNode.at("Siren").get<bool>();
+
+            if (jsonNode.contains("Roof"))
+                node.Roof = jsonNode.at("Roof").get<int>();
+
+            replayData.Nodes.push_back(node);
+        }
+        replayData.SetFullyParsed(true);
+        logger.Write(DEBUG, "[Replay-2] Parsed %s", mFileName.c_str());
+    }
+    catch (std::exception& ex) {
+        logger.Write(ERROR, "[Replay-2] Failed to open %s, exception: %s", mFileName.c_str(), ex.what());
+    }
+}
+
 void CReplayData::WriteAsync(CReplayData& replayData) {
     replayData.generateFileName();
     bool pretty = !GhostReplay::GetSettings().Record.ReduceFileSize;
@@ -267,4 +337,23 @@ void CReplayData::WriteMetadataSync(CReplayData& replayData) {
 
 void CReplayData::Delete() const {
     std::filesystem::remove(std::filesystem::path(mFileName));
+}
+
+void CReplayData::CompleteRead() {
+    if (FullyParsed())
+        return;
+
+    std::thread([this]() {
+        this->read();
+    }).detach();
+}
+
+bool CReplayData::FullyParsed() {
+    std::scoped_lock lock(mFullyParsedMtx);
+    return mFullyParsed;
+}
+
+void CReplayData::SetFullyParsed(bool newValue) {
+    std::scoped_lock lock(mFullyParsedMtx);
+    mFullyParsed = newValue;
 }

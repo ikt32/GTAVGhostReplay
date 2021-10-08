@@ -46,7 +46,7 @@ public:
         return mUnsavedRuns;
     }
 
-    std::vector<CReplayData*> ActiveReplays() const {
+    std::vector<std::shared_ptr<CReplayData>> ActiveReplays() const {
         return mActiveReplays;
     }
 
@@ -88,7 +88,7 @@ public:
     void AddCompatibleReplay(const CReplayData& value);
 
     bool IsFastestLap(const std::string& trackName, Hash vehicleModel, double timestamp);
-    CReplayData GetFastestReplay(const std::string& trackName, Hash vehicleModel);
+    std::shared_ptr<CReplayData> GetFastestReplay(const std::string& trackName, Hash vehicleModel);
 
     bool StartLineDef(SLineDef& lineDef, const std::string& lineName);
     void DeleteTrack(const CTrackData& track);
@@ -135,8 +135,8 @@ protected:
     void startRecord(double gameTime, Vehicle vehicle);
     bool saveNode(double gameTime, SReplayNode& node, Vehicle vehicle, bool firstNode);
     void finishRecord(bool saved, const SReplayNode& node);
-    CReplayData* getFastestActiveReplay();
-    CReplayData* getSlowestActiveReplay();
+    std::shared_ptr<CReplayData> getFastestActiveReplay();
+    std::shared_ptr<CReplayData> getSlowestActiveReplay();
     void updateSlowestReplay();
 
     void clearPtfx();
@@ -162,7 +162,7 @@ protected:
     std::vector<CImage>& mTrackImages;
     std::vector<CTrackData>& mArsTracks;
 
-    std::vector<CReplayData*> mActiveReplays;
+    std::vector<std::shared_ptr<CReplayData>> mActiveReplays;
     CTrackData* mActiveTrack;
 
     std::unique_ptr<CWrappedBlip> mStartBlip;
