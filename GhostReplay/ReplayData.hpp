@@ -35,12 +35,15 @@ struct SReplayNode {
 
 class CReplayData {
 public:
-    static CReplayData Read(const std::string& replayFile);
+    static CReplayData Read(const std::string& replayFile, bool full);
     static void WriteAsync(CReplayData& replayData);
+    static void WriteMetadataSync(CReplayData& replayData);
 
     CReplayData(std::string fileName);
     std::string FileName() const { return mFileName; }
     void Delete() const;
+
+    bool FullyParsed;
 
     bool MarkedForDeletion;
 
@@ -59,6 +62,8 @@ public:
 private:
     // Make sure mFileName has been set before calling this.
     void write(bool pretty);
+    void writeMetadata(bool pretty);
+
     // Only run this before asynchronously calling write().
     void generateFileName();
 

@@ -26,8 +26,44 @@ void from_json(const nlohmann::ordered_json& j, Vector3& vector3) {
     j.at("Z").get_to(vector3.z);
 }
 
-CReplayData CReplayData::Read(const std::string& replayFile) {
+CReplayData CReplayData::Read(const std::string& replayFile, bool full) {
     CReplayData replayData(replayFile);
+
+    if (!full) {
+        std::string metaFileName = replayFile.substr(0, replayFile.find_last_of('.')) + ".meta";
+        nlohmann::ordered_json metaJson;
+        std::ifstream metaFileStream(metaFileName.c_str());
+
+        if (!metaFileStream.is_open()) {
+            logger.Write(WARN, "[Meta] Failed to open %s, generating one and returning stuff", metaFileName.c_str());
+            CReplayData fullData = Read(replayFile, true);
+            if (fullData.FullyParsed)
+                WriteMetadataSync(fullData);
+            return fullData;
+        }
+
+        try {
+            metaFileStream >> metaJson;
+
+            replayData.Timestamp = metaJson.value("Timestamp", 0ull);
+            replayData.Name = metaJson["Name"];
+            replayData.Track = metaJson["Track"];
+            replayData.VehicleModel = metaJson["VehicleModel"];
+
+            for (auto& jsonNode : metaJson["IdNodes"]) {
+                SReplayNode node{};
+                node.Timestamp = jsonNode["T"];
+                node.Pos = jsonNode["Pos"];
+                replayData.Nodes.push_back(node);
+            }
+
+            return replayData;
+        }
+        catch (std::exception& ex) {
+            logger.Write(ERROR, "[Meta] Failed to open %s, exception: %s", metaFileName.c_str(), ex.what());
+            return replayData;
+        }
+    }
 
     nlohmann::ordered_json replayJson;
     std::ifstream replayFileStream(replayFile.c_str());
@@ -89,6 +125,7 @@ CReplayData CReplayData::Read(const std::string& replayFile) {
 
             replayData.Nodes.push_back(node);
         }
+        replayData.FullyParsed = true;
         logger.Write(DEBUG, "[Replay] Parsed %s", replayFile.c_str());
         return replayData;
     }
@@ -99,7 +136,8 @@ CReplayData CReplayData::Read(const std::string& replayFile) {
 }
 
 CReplayData::CReplayData(std::string fileName)
-    : MarkedForDeletion(false)
+    : FullyParsed(false)
+    , MarkedForDeletion(false)
     , Timestamp(0)
     , VehicleModel(0)
     , mFileName(std::move(fileName)) {}
@@ -154,6 +192,42 @@ void CReplayData::write(bool pretty) {
     logger.Write(INFO, "[Replay] Written %s", mFileName.c_str());
 }
 
+void CReplayData::writeMetadata(bool pretty) {
+    const std::string replaysPath =
+        Paths::GetModuleFolder(Paths::GetOurModuleHandle()) +
+        Constants::ModDir +
+        "\\Replays";
+    std::string metaFileName = fmt::format("{}\\{}.meta", replaysPath, Util::StripString(Name));
+
+    nlohmann::ordered_json metaJson;
+
+    metaJson["Timestamp"] = Timestamp;
+    metaJson["Name"] = Name;
+    metaJson["Track"] = Track;
+    metaJson["VehicleModel"] = VehicleModel;
+
+    nlohmann::ordered_json nodeFirst = {
+        { "T", Nodes.begin()->Timestamp},
+        { "Pos", Nodes.begin()->Pos },
+    };
+    metaJson["IdNodes"].push_back(nodeFirst);
+
+    nlohmann::ordered_json nodeLast = {
+        { "T", Nodes.back().Timestamp},
+        { "Pos", Nodes.back().Pos },
+    };
+    metaJson["IdNodes"].push_back(nodeLast);
+
+    std::ofstream metaFile(metaFileName);
+
+    if (pretty)
+        metaFile << std::setw(2) << metaJson << std::endl;
+    else
+        metaFile << metaJson.dump();
+
+    logger.Write(INFO, "[Meta] Written %s", metaFileName.c_str());
+}
+
 void CReplayData::generateFileName() {
     const std::string replaysPath =
         Paths::GetModuleFolder(Paths::GetOurModuleHandle()) +
@@ -183,6 +257,11 @@ void CReplayData::WriteAsync(CReplayData& replayData) {
         CReplayData myCopy = replayData;
         myCopy.write(pretty);
     }).detach();
+}
+
+void CReplayData::WriteMetadataSync(CReplayData& replayData) {
+    bool pretty = !GhostReplay::GetSettings().Record.ReduceFileSize;
+    replayData.writeMetadata(pretty);
 }
 
 void CReplayData::Delete() const {

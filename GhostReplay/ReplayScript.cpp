@@ -128,6 +128,9 @@ void CReplayScript::SelectReplay(const std::string& replayName, unsigned long lo
         bool timeOK = timestamp == 0 ? true : replay->Timestamp == timestamp;
 
         if (nameOK && timeOK) {
+            if (!replay->FullyParsed)
+                *replay = replay->Read(replay->FileName(), true);
+
             mActiveReplays.push_back(&*replay);
             mReplayVehicles.push_back(std::make_unique<CReplayVehicle>(mSettings, &*replay,
                 std::bind(static_cast<void(CReplayScript::*)(int)>(&CReplayScript::ghostCleanup),
