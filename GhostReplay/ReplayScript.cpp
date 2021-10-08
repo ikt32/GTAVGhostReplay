@@ -981,6 +981,9 @@ void CReplayScript::finishRecord(bool saved, const SReplayNode& node) {
         fastestLap = IsFastestLap(mCurrentRun.Track, 0, node.Timestamp);
     }
 
+    // "FullyParsed" is a lie, it just means it contains all data
+    mCurrentRun.FullyParsed = true;
+
     if (mSettings.Record.AutoGhost && (mActiveReplays.empty() || fasterLap)) {
         // Just deselect when there's 1 ghost, otherwise keep adding to the mayhem!
         if (mActiveReplays.size() == 1)
