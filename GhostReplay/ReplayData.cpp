@@ -256,6 +256,7 @@ void CReplayData::WriteAsync(CReplayData& replayData) {
     std::thread([replayData, pretty]() {
         CReplayData myCopy = replayData;
         myCopy.write(pretty);
+        myCopy.writeMetadata(pretty);
     }).detach();
 }
 
