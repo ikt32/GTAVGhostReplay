@@ -26,7 +26,7 @@ void from_json(const nlohmann::ordered_json& j, Vector3& vector3) {
     j.at("Z").get_to(vector3.z);
 }
 
-void CReplayData::ReadMeta(/*const std::string& replayFile*/) {
+void CReplayData::ReadMeta() {
     CReplayData& replayData = *this;
 
     std::string metaFileName = mFileName.substr(0, mFileName.find_last_of('.')) + ".meta";
@@ -34,7 +34,7 @@ void CReplayData::ReadMeta(/*const std::string& replayFile*/) {
     std::ifstream metaFileStream(metaFileName.c_str());
 
     if (!metaFileStream.is_open()) {
-        logger.Write(WARN, "[Meta] Failed to open %s, generating one and returning stuff", metaFileName.c_str());
+        logger.Write(DEBUG, "[Meta] %s missing, generating .meta file", metaFileName.c_str());
         completeRead(true);
         if (FullyParsed())
             WriteMetadataSync(*this);
@@ -199,7 +199,7 @@ void CReplayData::completeRead(bool fullRead) {
     nlohmann::ordered_json replayJson;
     std::ifstream replayFileStream(mFileName.c_str());
     if (!replayFileStream.is_open()) {
-        logger.Write(ERROR, "[Replay-2] Failed to open %s", mFileName.c_str());
+        logger.Write(ERROR, "[Replay] Failed to open %s", mFileName.c_str());
         return;
     }
 
@@ -265,10 +265,10 @@ void CReplayData::completeRead(bool fullRead) {
         lock.~scoped_lock();
 
         replayData.SetFullyParsed(true);
-        logger.Write(DEBUG, "[Replay-2] Parsed %s", mFileName.c_str());
+        logger.Write(DEBUG, "[Replay] Parsed %s", mFileName.c_str());
     }
     catch (std::exception& ex) {
-        logger.Write(ERROR, "[Replay-2] Failed to open %s, exception: %s", mFileName.c_str(), ex.what());
+        logger.Write(ERROR, "[Replay] Failed to open %s, exception: %s", mFileName.c_str(), ex.what());
     }
 }
 

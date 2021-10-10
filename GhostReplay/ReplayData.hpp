@@ -36,7 +36,7 @@ struct SReplayNode {
 
 class CReplayData {
 public:
-    void ReadMeta(/*const std::string& replayFile*/);
+    void ReadMeta();
     static void WriteAsync(CReplayData& replayData);
     static void WriteMetadataSync(CReplayData& replayData);
 

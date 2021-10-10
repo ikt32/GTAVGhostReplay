@@ -498,7 +498,7 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
                     Util::GetVehicleName(replay->VehicleModel)),
                 fmt::format("Time: {}",  Util::FormatMillisTime(replay->GetNodes().back().Timestamp)),
                 fmt::format("Lap recorded: {}", datetime),
-                fmt::format("{}", replay->FullyParsed() ? "Loaded/Ready!" : currentReplay ? "Loading..." : "Not loaded yet."),
+                fmt::format("Status: {}", replay->FullyParsed() ? "Ready" : currentReplay ? "Loading" : "Not loaded"),
             };
 
             if (mbCtx.OptionPlus(optionName, extras, nullptr, clearDeleteFlag, deleteFlag, "Ghost", description)) {
