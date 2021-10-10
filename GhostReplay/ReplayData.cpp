@@ -35,7 +35,7 @@ void CReplayData::ReadMeta(/*const std::string& replayFile*/) {
 
     if (!metaFileStream.is_open()) {
         logger.Write(WARN, "[Meta] Failed to open %s, generating one and returning stuff", metaFileName.c_str());
-        completeRead();
+        completeRead(true);
         if (FullyParsed())
             WriteMetadataSync(*this);
         return;
@@ -193,8 +193,7 @@ void CReplayData::generateFileName() {
     mFileName = fmt::format("{}\\{}{}.json", replaysPath, cleanName, suffix);
 }
 
-void CReplayData::completeRead() {
-    // Assume the base data already filled in, no overwrite it.
+void CReplayData::completeRead(bool fullRead) {
     CReplayData& replayData(*this);
 
     nlohmann::ordered_json replayJson;
@@ -206,6 +205,13 @@ void CReplayData::completeRead() {
 
     try {
         replayFileStream >> replayJson;
+
+        if (fullRead) {
+            replayData.Timestamp = replayJson.value("Timestamp", 0ull);
+            replayData.Name = replayJson["Name"];
+            replayData.Track = replayJson["Track"];
+            replayData.VehicleModel = replayJson["VehicleModel"];
+        }
 
         replayData.VehicleMods = replayJson.value("Mods", VehicleModData());
         replayData.ReplayDriver = replayJson.value("Driver", SReplayDriverData());
@@ -290,7 +296,7 @@ void CReplayData::CompleteReadAsync() {
         return;
 
     std::thread([this]() {
-        this->completeRead();
+        this->completeRead(false);
     }).detach();
 }
 

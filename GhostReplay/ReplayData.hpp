@@ -110,7 +110,7 @@ private:
     // Only run this before asynchronously calling write().
     void generateFileName();
 
-    void completeRead();
+    void completeRead(bool fullRead);
 
     std::string mFileName;
 
