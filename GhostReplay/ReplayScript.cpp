@@ -133,7 +133,7 @@ void CReplayScript::SelectReplay(const std::string& replayName, unsigned long lo
             }
 
             mActiveReplays.push_back(replay);
-            mReplayVehicles.push_back(std::make_unique<CReplayVehicle>(mSettings, &*replay,
+            mReplayVehicles.push_back(std::make_unique<CReplayVehicle>(mSettings, replay,
                 std::bind(static_cast<void(CReplayScript::*)(int)>(&CReplayScript::ghostCleanup),
                     this, std::placeholders::_1)));
 
@@ -779,10 +779,28 @@ void CReplayScript::updateReplay() {
             continue;
         }
 
-        anyGhostLapTriggered |= replayVehicle->UpdatePlayback(
+        if (mGlobalReplayState != EReplayState::Idle &&
+            replayVehicle->GetReplayState() == EReplayState::Idle &&
+            replayVehicle->GetReplay()->ReadyForPlay()) {
+            // Trigger Idle -> Playing state
+            replayVehicle->UpdatePlayback(mReplayCurrentTime, true, false);
+            // Set Paused/Playing state
+            replayVehicle->TogglePause(mGlobalReplayState == EReplayState::Paused);
+            // Set correct node
+            replayVehicle->SetReplayTime(mReplayCurrentTime);
+        }
+
+        bool ghostLapTriggered = replayVehicle->UpdatePlayback(
             replayTime,
             !inGhostVehicle && startPassedThisTick,
             !inGhostVehicle && finishPassedThisTick);
+        anyGhostLapTriggered |= ghostLapTriggered;
+
+        if (ghostLapTriggered) {
+            // Clear AutoPlay flag for async loaded replays,
+            // which started after the replay completely finished loading.
+            replayVehicle->GetReplay()->ReadyForPlay();
+        }
 
         if (replayVehicle->GetReplayState() != EReplayState::Idle) {
             Vector3 playerPos = ENTITY::GET_ENTITY_COORDS(mPlayerVehicle, true);

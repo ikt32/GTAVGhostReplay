@@ -54,6 +54,7 @@ public:
 
         mFileName = obj.mFileName;
         mFullyParsed = obj.mFullyParsed;
+        mAutoPlayPending = obj.mAutoPlayPending;
         mNodes = obj.mNodes;
     }
 
@@ -69,6 +70,7 @@ public:
 
         mFileName = obj.mFileName;
         mFullyParsed = obj.mFullyParsed;
+        mAutoPlayPending = obj.mAutoPlayPending;
         mNodes = obj.mNodes;
 
         return *this;
@@ -80,6 +82,9 @@ public:
 
     bool FullyParsed();
     void SetFullyParsed(bool newValue);
+    // Used to trigger auto-join of a selected replay after it has asyncronously loaded
+    // If true is returned, the next call it won't return true any more.
+    bool ReadyForPlay();
 
     bool MarkedForDeletion;
 
@@ -116,6 +121,7 @@ private:
 
     std::mutex mFullyParsedMtx;
     bool mFullyParsed;
+    bool mAutoPlayPending;
 
     std::mutex mNodesMutex;
     std::vector<SReplayNode> mNodes;

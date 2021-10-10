@@ -12,7 +12,7 @@
 
 using VExt = VehicleExtensions;
 
-CReplayVehicle::CReplayVehicle(const CScriptSettings& settings, CReplayData* activeReplay,
+CReplayVehicle::CReplayVehicle(const CScriptSettings& settings, std::shared_ptr<CReplayData> activeReplay,
     const std::function<void(Vehicle)>& onCleanup)
     : mSettings(settings)
     , mActiveReplay(activeReplay)
@@ -419,7 +419,7 @@ void CReplayVehicle::resetReplay() {
     deleteBlip();
 }
 
-void CReplayVehicle::createReplayVehicle(Hash model, CReplayData* activeReplay, Vector3 pos) {
+void CReplayVehicle::createReplayVehicle(Hash model, std::shared_ptr<CReplayData> activeReplay, Vector3 pos) {
     if (model == 0 || activeReplay == nullptr) {
         return;
     }

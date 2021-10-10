@@ -67,7 +67,8 @@ CReplayData::CReplayData(std::string fileName)
     , Timestamp(0)
     , VehicleModel(0)
     , mFileName(std::move(fileName))
-    , mFullyParsed(false) {}
+    , mFullyParsed(false)
+    , mAutoPlayPending(false) {}
 
 std::vector<SReplayNode>& CReplayData::GetNodes() {
     std::scoped_lock lock(mNodesMutex);
@@ -295,6 +296,7 @@ void CReplayData::CompleteReadAsync() {
     if (FullyParsed())
         return;
 
+    mAutoPlayPending = true;
     std::thread([this]() {
         this->completeRead(false);
     }).detach();
@@ -308,4 +310,12 @@ bool CReplayData::FullyParsed() {
 void CReplayData::SetFullyParsed(bool newValue) {
     std::scoped_lock lock(mFullyParsedMtx);
     mFullyParsed = newValue;
+}
+
+bool CReplayData::ReadyForPlay() {
+    if (mAutoPlayPending && FullyParsed()) {
+        mAutoPlayPending = false;
+        return true;
+    }
+    return false;
 }
