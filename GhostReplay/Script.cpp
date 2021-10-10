@@ -272,9 +272,10 @@ void GhostReplay::LoadReplays() {
                 currentLoadingReplay = std::filesystem::path(file).stem().string();
             }
 
+            CReplayData replay(file);
+            replay.ReadMeta();
 
-            CReplayData replay = CReplayData::Read(file);
-            if (!replay.Nodes.empty()) {
+            if (!replay.GetNodes().empty()) {
                 std::lock_guard replaysLock(replaysMutex);
                 replays.push_back(std::make_shared<CReplayData>(replay));
             }

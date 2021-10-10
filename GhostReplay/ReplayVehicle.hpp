@@ -12,7 +12,7 @@ enum class EReplayState {
 
 class CReplayVehicle {
 public:
-    CReplayVehicle(const CScriptSettings& settings, CReplayData* activeReplay, const std::function<void(Vehicle)>& onCleanup);
+    CReplayVehicle(const CScriptSettings& settings, std::shared_ptr<CReplayData> activeReplay, const std::function<void(Vehicle)>& onCleanup);
 
     CReplayVehicle(const CReplayVehicle&) = delete;
     CReplayVehicle& operator=(const CReplayVehicle&) = delete;
@@ -22,7 +22,7 @@ public:
     ~CReplayVehicle();
 
     Vehicle GetVehicle() { return mReplayVehicle; }
-    CReplayData* GetReplay() { return mActiveReplay; }
+    std::shared_ptr<CReplayData> GetReplay() { return mActiveReplay; }
 
     void UpdateCollision(bool enable);
 
@@ -53,7 +53,7 @@ public:
 
 private:
     const CScriptSettings& mSettings;
-    CReplayData* mActiveReplay;
+    std::shared_ptr<CReplayData> mActiveReplay;
 
     Vehicle mReplayVehicle;
     Ped mReplayPed;
@@ -70,7 +70,7 @@ private:
         std::vector<SReplayNode>::iterator nodeNext);
     void resetReplay();
 
-    void createReplayVehicle(Hash model, CReplayData* activeReplay, Vector3 pos);
+    void createReplayVehicle(Hash model, std::shared_ptr<CReplayData> activeReplay, Vector3 pos);
     void createReplayPed();
     void createBlip();
     void deleteBlip();

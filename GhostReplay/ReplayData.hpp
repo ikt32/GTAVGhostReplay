@@ -6,6 +6,7 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include <mutex>
 
 struct SReplayNode {
     double Timestamp;
@@ -35,12 +36,55 @@ struct SReplayNode {
 
 class CReplayData {
 public:
-    static CReplayData Read(const std::string& replayFile);
+    void ReadMeta();
     static void WriteAsync(CReplayData& replayData);
+    static void WriteMetadataSync(CReplayData& replayData);
 
     CReplayData(std::string fileName);
+
+    // Copy constructor - skip mutex
+    CReplayData(const CReplayData& obj) {
+        MarkedForDeletion = obj.MarkedForDeletion;
+        Timestamp = obj.Timestamp;
+        Name = obj.Name;
+        Track = obj.Track;
+        VehicleModel = obj.VehicleModel;
+        VehicleMods = obj.VehicleMods;
+        ReplayDriver = obj.ReplayDriver;
+
+        mFileName = obj.mFileName;
+        mFullyParsed = obj.mFullyParsed;
+        mAutoPlayPending = obj.mAutoPlayPending;
+        mNodes = obj.mNodes;
+    }
+
+    // Move constructor - skip mutex
+    CReplayData& operator=(const CReplayData&& obj) {
+        MarkedForDeletion = obj.MarkedForDeletion;
+        Timestamp = obj.Timestamp;
+        Name = obj.Name;
+        Track = obj.Track;
+        VehicleModel = obj.VehicleModel;
+        VehicleMods = obj.VehicleMods;
+        ReplayDriver = obj.ReplayDriver;
+
+        mFileName = obj.mFileName;
+        mFullyParsed = obj.mFullyParsed;
+        mAutoPlayPending = obj.mAutoPlayPending;
+        mNodes = obj.mNodes;
+
+        return *this;
+    }
+
     std::string FileName() const { return mFileName; }
     void Delete() const;
+    void CompleteReadAsync();
+
+    bool FullyParsed();
+    void SetFullyParsed(bool newValue);
+    // Used to trigger auto-join of a selected replay after it has asyncronously loaded
+    // If true is returned, the next call it won't return true any more.
+    bool ReadyForPlay();
 
     bool MarkedForDeletion;
 
@@ -55,12 +99,30 @@ public:
     // Nodes.front() shall be used to figure out which CReplayDatas apply to a given starting point.
     // The menu shall be used to select the one that applies, so multiple CReplayData recordings can be
     // chosen from.
-    std::vector<SReplayNode> Nodes;
+
+    // TODO: Node access while not completely loaded -> Crash
+    // Needs a mutex, but then things are slow again.
+    // Could *not* start a replay when still loading if the player triggers a start?
+    std::vector<SReplayNode>& GetNodes();
+    void ClearNodes();
+    void AddNode(const SReplayNode& node);
+
 private:
     // Make sure mFileName has been set before calling this.
     void write(bool pretty);
+    void writeMetadata(bool pretty);
+
     // Only run this before asynchronously calling write().
     void generateFileName();
 
+    void completeRead(bool fullRead);
+
     std::string mFileName;
+
+    std::mutex mFullyParsedMtx;
+    bool mFullyParsed;
+    bool mAutoPlayPending;
+
+    std::mutex mNodesMutex;
+    std::vector<SReplayNode> mNodes;
 };
