@@ -93,7 +93,7 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
                 fmt::format("Vehicle: {} {}",
                     Util::GetVehicleMake(activeReplay->VehicleModel),
                     Util::GetVehicleName(activeReplay->VehicleModel)),
-                fmt::format("Time: {}", Util::FormatMillisTime(activeReplay->Nodes.back().Timestamp))
+                fmt::format("Time: {}", Util::FormatMillisTime(activeReplay->GetNodes().back().Timestamp))
             };
         }
         else if (activeReplays.size() > 1) {
@@ -108,7 +108,7 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
                 ghostDetails.push_back(fmt::format(" {} {} ({})",
                     Util::GetVehicleMake(replay->VehicleModel),
                     Util::GetVehicleName(replay->VehicleModel),
-                    Util::FormatMillisTime(replay->Nodes.back().Timestamp)));
+                    Util::FormatMillisTime(replay->GetNodes().back().Timestamp)));
             }
         }
 
@@ -480,7 +480,7 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
             };
 
             std::string optionNameRaw = fmt::format("{} - {}",
-                Util::FormatMillisTime(replay->Nodes.back().Timestamp),
+                Util::FormatMillisTime(replay->GetNodes().back().Timestamp),
                 Util::GetVehicleName(replay->VehicleModel));
             std::string optionName = fmt::format("{}{}{}", deleteCol, selector, optionNameRaw);
             std::string datetime;
@@ -496,7 +496,7 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
                 fmt::format("Vehicle: {} {}",
                     Util::GetVehicleMake(replay->VehicleModel),
                     Util::GetVehicleName(replay->VehicleModel)),
-                fmt::format("Time: {}",  Util::FormatMillisTime(replay->Nodes.back().Timestamp)),
+                fmt::format("Time: {}",  Util::FormatMillisTime(replay->GetNodes().back().Timestamp)),
                 fmt::format("Lap recorded: {}", datetime),
                 fmt::format("{}", replay->FullyParsed() ? "Loaded/Ready!" : currentReplay ? "Loading..." : "Not loaded yet."),
             };
@@ -530,7 +530,7 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
         auto unsavedRunIt = context.GetUnsavedRuns().begin();
         while (unsavedRunIt != context.GetUnsavedRuns().end()) {
             std::string runName = Util::FormatReplayName(
-                unsavedRunIt->Nodes.back().Timestamp,
+                unsavedRunIt->GetNodes().back().Timestamp,
                 unsavedRunIt->Track,
                 Util::GetVehicleName(unsavedRunIt->VehicleModel));
 
@@ -548,7 +548,7 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
                 fmt::format("Vehicle: {} {}",
                     Util::GetVehicleMake(unsavedRunIt->VehicleModel),
                     Util::GetVehicleName(unsavedRunIt->VehicleModel)),
-                fmt::format("Time: {}", Util::FormatMillisTime(unsavedRunIt->Nodes.back().Timestamp)),
+                fmt::format("Time: {}", Util::FormatMillisTime(unsavedRunIt->GetNodes().back().Timestamp)),
                 fmt::format("Lap recorded: {}", datetime),
             };
 
@@ -645,7 +645,7 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
                     replayStateName,
                     fmt::format("{} / {}",
                         Util::FormatMillisTime(replayVehicles[0]->GetReplayProgress()),
-                        Util::FormatMillisTime(activeReplay->Nodes.back().Timestamp)),
+                        Util::FormatMillisTime(activeReplay->GetNodes().back().Timestamp)),
                 };
             }
             else if (activeReplays.size() > 1) {
@@ -669,7 +669,7 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
                         fmt::format("{} - {} / {}",
                             Util::GetVehicleName(replayVehicle->GetReplay()->VehicleModel),
                             Util::FormatMillisTime(replayVehicle->GetReplayProgress()),
-                            Util::FormatMillisTime(replayVehicle->GetReplay()->Nodes.back().Timestamp))
+                            Util::FormatMillisTime(replayVehicle->GetReplay()->GetNodes().back().Timestamp))
                     );
                 }
             }
@@ -744,7 +744,7 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
                     passengerDetails.push_back(fmt::format("{}{} - {} ({})",
                         selectMarker,
                         Util::GetVehicleName(replayVehicle->GetReplay()->VehicleModel),
-                        Util::FormatMillisTime(replayVehicle->GetReplay()->Nodes.back().Timestamp),
+                        Util::FormatMillisTime(replayVehicle->GetReplay()->GetNodes().back().Timestamp),
                         replayVehicle->GetReplayState() == EReplayState::Idle ? "Stopped" : "Playing"));
                 }
 
@@ -973,7 +973,7 @@ const std::vector<std::string>& GhostReplay::FormatTrackData(NativeMenu::Menu& m
     std::string lapRecordString = "No times set";
     if (fastestReplayInfo != nullptr) {
         lapRecordString = fmt::format("{} ({})",
-            Util::FormatMillisTime(fastestReplayInfo->Nodes.back().Timestamp),
+            Util::FormatMillisTime(fastestReplayInfo->GetNodes().back().Timestamp),
             Util::GetVehicleName(fastestReplayInfo->VehicleModel));
     }
 
@@ -996,7 +996,7 @@ const std::vector<std::string>& GhostReplay::FormatTrackData(NativeMenu::Menu& m
     // compatibleReplays is ordered quickest to slowest.
     std::sort(compatibleReplays.begin(), compatibleReplays.end(),
         [](const auto& a, const auto& b) {
-            return a->Nodes.back().Timestamp < b->Nodes.back().Timestamp;
+            return a->GetNodes().back().Timestamp < b->GetNodes().back().Timestamp;
         });
 
     std::vector<Hash> fastestModels;
@@ -1004,7 +1004,7 @@ const std::vector<std::string>& GhostReplay::FormatTrackData(NativeMenu::Menu& m
         if (std::find(fastestModels.begin(), fastestModels.end(), replay->VehicleModel) != fastestModels.end())
             continue;
         extras.push_back(fmt::format("{} ({})",
-            Util::FormatMillisTime(replay->Nodes.back().Timestamp),
+            Util::FormatMillisTime(replay->GetNodes().back().Timestamp),
             Util::GetVehicleName(replay->VehicleModel)));
         fastestModels.push_back(replay->VehicleModel);
     }
@@ -1094,7 +1094,7 @@ void GhostReplay::UpdateReplayFilter(CReplayScript& context) {
     for (const auto& replay : context.GetCompatibleReplays(context.ActiveTrack()->Name)) {
         std::string vehicleMake = Util::GetVehicleMake(replay->VehicleModel);
         std::string vehicleName = Util::GetVehicleName(replay->VehicleModel);
-        std::string tracktime = Util::FormatMillisTime(replay->Nodes.back().Timestamp);
+        std::string tracktime = Util::FormatMillisTime(replay->GetNodes().back().Timestamp);
         std::string datetime;
         if (replay->Timestamp == 0) {
             datetime = "No date";
@@ -1126,7 +1126,7 @@ void GhostReplay::UpdateReplayFilter(CReplayScript& context) {
 
     auto timeLess = [](const std::shared_ptr<CReplayData>& replaya,
         const std::shared_ptr<CReplayData>& replayb) {
-        return replaya->Nodes.back().Timestamp < replayb->Nodes.back().Timestamp;
+        return replaya->GetNodes().back().Timestamp < replayb->GetNodes().back().Timestamp;
     };
 
     // Lap time

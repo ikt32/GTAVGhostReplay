@@ -19,8 +19,8 @@ CReplayVehicle::CReplayVehicle(const CScriptSettings& settings, CReplayData* act
     , mReplayVehicle(0)
     , mReplayState(EReplayState::Idle)
     , mOnCleanup(onCleanup) {
-    mLastNode = activeReplay->Nodes.begin();
-    createReplayVehicle(activeReplay->VehicleModel, activeReplay, activeReplay->Nodes[0].Pos);
+    mLastNode = activeReplay->GetNodes().begin();
+    createReplayVehicle(activeReplay->VehicleModel, activeReplay, activeReplay->GetNodes()[0].Pos);
     if (mSettings.Replay.EnableDrivers)
         createReplayPed();
     hideVehicle();
@@ -66,9 +66,9 @@ bool CReplayVehicle::UpdatePlayback(double replayTime, bool startPassedThisTick,
             break;
         }
         case EReplayState::Paused: {
-            if (mActiveReplay && mLastNode == mActiveReplay->Nodes.end()) {
+            if (mActiveReplay && mLastNode == mActiveReplay->GetNodes().end()) {
                 logger.Write(DEBUG, "Updating currentNode to activeReplay begin");
-                mLastNode = mActiveReplay->Nodes.begin();
+                mLastNode = mActiveReplay->GetNodes().begin();
                 startReplay();
                 startedReplayThisTick = true;
             }
@@ -77,15 +77,15 @@ bool CReplayVehicle::UpdatePlayback(double replayTime, bool startPassedThisTick,
         }
         case EReplayState::Playing: {
             if (replayTime < 0.0) {
-                showNode(0.0, mActiveReplay->Nodes.begin(), mActiveReplay->Nodes.begin());
+                showNode(0.0, mActiveReplay->GetNodes().begin(), mActiveReplay->GetNodes().begin());
                 break;
             }
 
             // Find the node where the timestamp is larger than the current virtual timestamp (replayTime).
-            auto nodeNext = std::upper_bound(mLastNode, mActiveReplay->Nodes.end(), SReplayNode{ replayTime });
+            auto nodeNext = std::upper_bound(mLastNode, mActiveReplay->GetNodes().end(), SReplayNode{ replayTime });
 
             // The ghost has reached the end of the recording
-            if (nodeNext == mActiveReplay->Nodes.end()) {
+            if (nodeNext == mActiveReplay->GetNodes().end()) {
                 mReplayState = EReplayState::Idle;
                 resetReplay();
                 break;
@@ -93,7 +93,7 @@ bool CReplayVehicle::UpdatePlayback(double replayTime, bool startPassedThisTick,
 
             // Update the node passed, if progressed past it.
             if (mLastNode != std::prev(nodeNext)) {
-                if (nodeNext != mActiveReplay->Nodes.begin()) {
+                if (nodeNext != mActiveReplay->GetNodes().begin()) {
                     mLastNode = std::prev(nodeNext);
                 }
                 else {
@@ -126,7 +126,7 @@ bool CReplayVehicle::UpdatePlayback(double replayTime, bool startPassedThisTick,
 }
 
 double CReplayVehicle::GetReplayProgress() {
-    if (mActiveReplay && mLastNode != mActiveReplay->Nodes.end()) {
+    if (mActiveReplay && mLastNode != mActiveReplay->GetNodes().end()) {
         return mLastNode->Timestamp;
     }
     return 0;
@@ -147,21 +147,21 @@ void CReplayVehicle::TogglePause(bool pause) {
 void CReplayVehicle::SetReplayTime(double replayTime) {
     // Find node with smaller timestamp than our replayTime
     auto nodeCurr = std::lower_bound(
-        mActiveReplay->Nodes.begin(),
-        mActiveReplay->Nodes.end(),
+        mActiveReplay->GetNodes().begin(),
+        mActiveReplay->GetNodes().end(),
         SReplayNode{ replayTime });
 
     // Allow ghost to end when scrubbing when not paused
     if (mReplayState == EReplayState::Playing) {
         // The ghost has reached the end of the recording
-        if (nodeCurr == mActiveReplay->Nodes.end() || std::next(nodeCurr) == mActiveReplay->Nodes.end()) {
+        if (nodeCurr == mActiveReplay->GetNodes().end() || std::next(nodeCurr) == mActiveReplay->GetNodes().end()) {
             mReplayState = EReplayState::Idle;
             resetReplay();
             return;
         }
     }
 
-    if (nodeCurr != mActiveReplay->Nodes.begin())
+    if (nodeCurr != mActiveReplay->GetNodes().begin())
         mLastNode = std::prev(nodeCurr);
     else {
         mLastNode = nodeCurr;
@@ -170,22 +170,22 @@ void CReplayVehicle::SetReplayTime(double replayTime) {
 
 uint64_t CReplayVehicle::GetNumFrames() {
     if (mActiveReplay)
-        return mActiveReplay->Nodes.size();
+        return mActiveReplay->GetNodes().size();
     return 0;
 }
 
 uint64_t CReplayVehicle::GetFrameIndex() {
-    if (!mActiveReplay || mLastNode == mActiveReplay->Nodes.end())
+    if (!mActiveReplay || mLastNode == mActiveReplay->GetNodes().end())
         return 0;
 
-    return static_cast<uint64_t>(std::distance(mActiveReplay->Nodes.begin(), mLastNode));
+    return static_cast<uint64_t>(std::distance(mActiveReplay->GetNodes().begin(), mLastNode));
 }
 
 double CReplayVehicle::FramePrev() {
     if (!mActiveReplay)
         return 0.0;
 
-    if (mLastNode == mActiveReplay->Nodes.begin())
+    if (mLastNode == mActiveReplay->GetNodes().begin())
         return 0.0;
 
     auto prevIt = std::prev(mLastNode);
@@ -195,10 +195,10 @@ double CReplayVehicle::FramePrev() {
 }
 
 double CReplayVehicle::FrameNext() {
-    if (!mActiveReplay || mLastNode == mActiveReplay->Nodes.end())
+    if (!mActiveReplay || mLastNode == mActiveReplay->GetNodes().end())
         return 0.0;
 
-    if (std::next(mLastNode) == mActiveReplay->Nodes.end())
+    if (std::next(mLastNode) == mActiveReplay->GetNodes().end())
         return 0.0;
 
     auto nextIt = std::next(mLastNode);
@@ -221,7 +221,7 @@ void CReplayVehicle::ToggleDriver(bool enable) {
 
 void CReplayVehicle::startReplay() {
     unhideVehicle();
-    mLastNode = mActiveReplay->Nodes.begin();
+    mLastNode = mActiveReplay->GetNodes().begin();
 
     if (mSettings.Main.GhostBlips)
         createBlip();
@@ -235,7 +235,7 @@ void CReplayVehicle::showNode(
     // Make sure the frame control doesn't go further than std::next(nodeCurr) == end();
     bool paused = nodeCurr == nodeNext;
     if (paused) {
-        if (std::next(nodeNext) != mActiveReplay->Nodes.end()) {
+        if (std::next(nodeNext) != mActiveReplay->GetNodes().end()) {
             nodeNext = std::next(nodeNext);
         }
         else {
@@ -277,7 +277,7 @@ void CReplayVehicle::showNode(
         MISC::GET_MODEL_DIMENSIONS(ENTITY::GET_ENTITY_MODEL(mReplayVehicle), &dimMin, &dimMax);
         vehUp.z += dimMax.z + 1.0f;
         UI::ShowText3D(vehUp, 10.0f, {
-            Util::FormatMillisTime(mActiveReplay->Nodes.back().Timestamp),
+            Util::FormatMillisTime(mActiveReplay->GetNodes().back().Timestamp),
             Util::FormatMillisTime(GetReplayProgress()),
             fmt::format("Type: {}", syncType),
             fmt::format("Limit: {:.3f}", mSettings.Replay.SyncDistance),
@@ -285,7 +285,7 @@ void CReplayVehicle::showNode(
         });
     }
 
-    if (nodeCurr == mActiveReplay->Nodes.begin() || paused ||
+    if (nodeCurr == mActiveReplay->GetNodes().begin() || paused ||
         mSettings.Replay.SyncType == ESyncType::Distance && dist > mSettings.Replay.SyncDistance ||
         mSettings.Replay.SyncType == ESyncType::Constant) {
         ENTITY::SET_ENTITY_COORDS_NO_OFFSET(mReplayVehicle, pos.x, pos.y, pos.z, false, false, false);
@@ -415,7 +415,7 @@ void CReplayVehicle::resetReplay() {
         mOnCleanup(mReplayVehicle);
 
     hideVehicle();
-    mLastNode = mActiveReplay->Nodes.begin();
+    mLastNode = mActiveReplay->GetNodes().begin();
     deleteBlip();
 }
 
@@ -562,7 +562,7 @@ void CReplayVehicle::createBlip() {
         blipSprite,
         fmt::format("Replay - {} ({})",
             Util::GetVehicleName(mActiveReplay->VehicleModel),
-            Util::FormatMillisTime(mActiveReplay->Nodes.back().Timestamp)),
+            Util::FormatMillisTime(mActiveReplay->GetNodes().back().Timestamp)),
         eBlipColor::BlipColorWhite, true);
 
     if (blipSprite == eBlipSprite::BlipSpritePoliceOfficer2) {
@@ -623,8 +623,8 @@ void CReplayVehicle::unhideVehicle() {
                 break;
             case 0: // Default
             default:
-                if (mActiveReplay->Nodes[0].Roof != std::nullopt) {
-                    auto nodeRoofState = mActiveReplay->Nodes[0].Roof.value();
+                if (mActiveReplay->GetNodes()[0].Roof != std::nullopt) {
+                    auto nodeRoofState = mActiveReplay->GetNodes()[0].Roof.value();
                     if (nodeRoofState == 0 || nodeRoofState == 3) {
                         VEHICLE::RAISE_CONVERTIBLE_ROOF(mReplayVehicle, true);
                     }

@@ -36,7 +36,7 @@ struct SReplayNode {
 
 class CReplayData {
 public:
-    static CReplayData Read(const std::string& replayFile, bool full);
+    void ReadMeta(/*const std::string& replayFile*/);
     static void WriteAsync(CReplayData& replayData);
     static void WriteMetadataSync(CReplayData& replayData);
 
@@ -51,10 +51,10 @@ public:
         VehicleModel = obj.VehicleModel;
         VehicleMods = obj.VehicleMods;
         ReplayDriver = obj.ReplayDriver;
-        Nodes = obj.Nodes;
 
         mFileName = obj.mFileName;
         mFullyParsed = obj.mFullyParsed;
+        mNodes = obj.mNodes;
     }
 
     // Move constructor - skip mutex
@@ -66,17 +66,17 @@ public:
         VehicleModel = obj.VehicleModel;
         VehicleMods = obj.VehicleMods;
         ReplayDriver = obj.ReplayDriver;
-        Nodes = obj.Nodes;
 
         mFileName = obj.mFileName;
         mFullyParsed = obj.mFullyParsed;
+        mNodes = obj.mNodes;
 
         return *this;
     }
 
     std::string FileName() const { return mFileName; }
     void Delete() const;
-    void CompleteRead();
+    void CompleteReadAsync();
 
     bool FullyParsed();
     void SetFullyParsed(bool newValue);
@@ -98,7 +98,10 @@ public:
     // TODO: Node access while not completely loaded -> Crash
     // Needs a mutex, but then things are slow again.
     // Could *not* start a replay when still loading if the player triggers a start?
-    std::vector<SReplayNode> Nodes;
+    std::vector<SReplayNode>& GetNodes();
+    void ClearNodes();
+    void AddNode(const SReplayNode& node);
+
 private:
     // Make sure mFileName has been set before calling this.
     void write(bool pretty);
@@ -107,10 +110,13 @@ private:
     // Only run this before asynchronously calling write().
     void generateFileName();
 
-    void read();
+    void completeRead();
 
     std::string mFileName;
 
     std::mutex mFullyParsedMtx;
     bool mFullyParsed;
+
+    std::mutex mNodesMutex;
+    std::vector<SReplayNode> mNodes;
 };

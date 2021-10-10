@@ -26,112 +26,39 @@ void from_json(const nlohmann::ordered_json& j, Vector3& vector3) {
     j.at("Z").get_to(vector3.z);
 }
 
-CReplayData CReplayData::Read(const std::string& replayFile, bool full) {
-    CReplayData replayData(replayFile);
+void CReplayData::ReadMeta(/*const std::string& replayFile*/) {
+    CReplayData& replayData = *this;
 
-    if (!full) {
-        std::string metaFileName = replayFile.substr(0, replayFile.find_last_of('.')) + ".meta";
-        nlohmann::ordered_json metaJson;
-        std::ifstream metaFileStream(metaFileName.c_str());
+    std::string metaFileName = mFileName.substr(0, mFileName.find_last_of('.')) + ".meta";
+    nlohmann::ordered_json metaJson;
+    std::ifstream metaFileStream(metaFileName.c_str());
 
-        if (!metaFileStream.is_open()) {
-            logger.Write(WARN, "[Meta] Failed to open %s, generating one and returning stuff", metaFileName.c_str());
-            CReplayData fullData = Read(replayFile, true);
-            if (fullData.FullyParsed())
-                WriteMetadataSync(fullData);
-            return fullData;
-        }
-
-        try {
-            metaFileStream >> metaJson;
-
-            replayData.Timestamp = metaJson.value("Timestamp", 0ull);
-            replayData.Name = metaJson["Name"];
-            replayData.Track = metaJson["Track"];
-            replayData.VehicleModel = metaJson["VehicleModel"];
-
-            for (auto& jsonNode : metaJson["IdNodes"]) {
-                SReplayNode node{};
-                node.Timestamp = jsonNode["T"];
-                node.Pos = jsonNode["Pos"];
-                replayData.Nodes.push_back(node);
-            }
-
-            return replayData;
-        }
-        catch (std::exception& ex) {
-            logger.Write(ERROR, "[Meta] Failed to open %s, exception: %s", metaFileName.c_str(), ex.what());
-            return replayData;
-        }
-    }
-
-    nlohmann::ordered_json replayJson;
-    std::ifstream replayFileStream(replayFile.c_str());
-    if (!replayFileStream.is_open()) {
-        logger.Write(ERROR, "[Replay] Failed to open %s", replayFile.c_str());
-        return replayData;
+    if (!metaFileStream.is_open()) {
+        logger.Write(WARN, "[Meta] Failed to open %s, generating one and returning stuff", metaFileName.c_str());
+        completeRead();
+        if (FullyParsed())
+            WriteMetadataSync(*this);
+        return;
     }
 
     try {
-        replayFileStream >> replayJson;
+        metaFileStream >> metaJson;
 
-        replayData.Timestamp = replayJson.value("Timestamp", 0ull);
-        replayData.Name = replayJson["Name"];
-        replayData.Track = replayJson["Track"];
-        replayData.VehicleModel = replayJson["VehicleModel"];
-        replayData.VehicleMods = replayJson.value("Mods", VehicleModData());
-        replayData.ReplayDriver = replayJson.value("Driver", SReplayDriverData());
+        replayData.Timestamp = metaJson.value("Timestamp", 0ull);
+        replayData.Name = metaJson["Name"];
+        replayData.Track = metaJson["Track"];
+        replayData.VehicleModel = metaJson["VehicleModel"];
 
-        for (auto& jsonNode : replayJson["Nodes"]) {
+        std::scoped_lock lock(mNodesMutex);
+        for (auto& jsonNode : metaJson["IdNodes"]) {
             SReplayNode node{};
             node.Timestamp = jsonNode["T"];
-            if (jsonNode.find("PX") == jsonNode.end()) {
-                node.Pos = jsonNode["Pos"];
-                node.Rot = jsonNode["Rot"];
-            }
-            else {
-                node.Pos.x = jsonNode["PX"];
-                node.Pos.y = jsonNode["PY"];
-                node.Pos.z = jsonNode["PZ"];
-                node.Rot.x = jsonNode["RX"];
-                node.Rot.y = jsonNode["RY"];
-                node.Rot.z = jsonNode["RZ"];
-            }
-            node.WheelRotations = jsonNode.value("WheelRotations", std::vector<float>());
-            node.SuspensionCompressions = jsonNode.value("SuspensionCompressions", std::vector<float>());
-            node.SteeringAngle = jsonNode.value("Steering", 0.0f);
-            node.Throttle = jsonNode.value("Throttle", 0.0f);
-            node.Brake = jsonNode.value("Brake", 0.0f);
-            node.Gear = jsonNode.value("Gear", -1);
-            node.RPM = jsonNode.value("RPM", -1.0f);
-
-            if (jsonNode.contains("LowBeams"))
-                node.LowBeams = jsonNode.at("LowBeams").get<bool>();
-            
-            if (jsonNode.contains("HighBeams"))
-                node.HighBeams = jsonNode.at("HighBeams").get<bool>();
-
-            if (jsonNode.contains("IndicatorLeft"))
-                node.IndicatorLeft = jsonNode.at("IndicatorLeft").get<bool>();
-
-            if (jsonNode.contains("IndicatorRight"))
-                node.IndicatorRight = jsonNode.at("IndicatorRight").get<bool>();
-
-            if (jsonNode.contains("Siren"))
-                node.Siren = jsonNode.at("Siren").get<bool>();
-
-            if (jsonNode.contains("Roof"))
-                node.Roof = jsonNode.at("Roof").get<int>();
-
-            replayData.Nodes.push_back(node);
+            node.Pos = jsonNode["Pos"];
+            replayData.mNodes.push_back(node);
         }
-        replayData.SetFullyParsed(true);
-        logger.Write(DEBUG, "[Replay] Parsed %s", replayFile.c_str());
-        return replayData;
     }
     catch (std::exception& ex) {
-        logger.Write(ERROR, "[Replay] Failed to open %s, exception: %s", replayFile.c_str(), ex.what());
-        return replayData;
+        logger.Write(ERROR, "[Meta] Failed to open %s, exception: %s", metaFileName.c_str(), ex.what());
     }
 }
 
@@ -141,6 +68,21 @@ CReplayData::CReplayData(std::string fileName)
     , VehicleModel(0)
     , mFileName(std::move(fileName))
     , mFullyParsed(false) {}
+
+std::vector<SReplayNode>& CReplayData::GetNodes() {
+    std::scoped_lock lock(mNodesMutex);
+    return mNodes;
+}
+
+void CReplayData::ClearNodes() {
+    std::scoped_lock lock(mNodesMutex);
+    mNodes.clear();
+}
+
+void CReplayData::AddNode(const SReplayNode& node) {
+    std::scoped_lock lock(mNodesMutex);
+    mNodes.push_back(node);
+}
 
 void CReplayData::write(bool pretty) {
     nlohmann::ordered_json replayJson;
@@ -152,7 +94,8 @@ void CReplayData::write(bool pretty) {
     replayJson["Mods"] = VehicleMods;
     replayJson["Driver"] = ReplayDriver;
 
-    for (auto& Node : Nodes) {
+    // Nodes during write access is (probably) safe without mutex.
+    for (auto& Node : mNodes) {
         nlohmann::ordered_json node = {
             { "T", Node.Timestamp },
             { "Pos", Node.Pos },
@@ -207,14 +150,14 @@ void CReplayData::writeMetadata(bool pretty) {
     metaJson["VehicleModel"] = VehicleModel;
 
     nlohmann::ordered_json nodeFirst = {
-        { "T", Nodes.begin()->Timestamp},
-        { "Pos", Nodes.begin()->Pos },
+        { "T", mNodes.begin()->Timestamp},
+        { "Pos", mNodes.begin()->Pos },
     };
     metaJson["IdNodes"].push_back(nodeFirst);
 
     nlohmann::ordered_json nodeLast = {
-        { "T", Nodes.back().Timestamp},
-        { "Pos", Nodes.back().Pos },
+        { "T", mNodes.back().Timestamp},
+        { "Pos", mNodes.back().Pos },
     };
     metaJson["IdNodes"].push_back(nodeLast);
 
@@ -250,7 +193,7 @@ void CReplayData::generateFileName() {
     mFileName = fmt::format("{}\\{}{}.json", replaysPath, cleanName, suffix);
 }
 
-void CReplayData::read() {
+void CReplayData::completeRead() {
     // Assume the base data already filled in, no overwrite it.
     CReplayData& replayData(*this);
 
@@ -267,7 +210,8 @@ void CReplayData::read() {
         replayData.VehicleMods = replayJson.value("Mods", VehicleModData());
         replayData.ReplayDriver = replayJson.value("Driver", SReplayDriverData());
 
-        replayData.Nodes.clear();
+        std::scoped_lock lock(mNodesMutex);
+        replayData.mNodes.clear();
 
         for (auto& jsonNode : replayJson["Nodes"]) {
             SReplayNode node{};
@@ -310,8 +254,10 @@ void CReplayData::read() {
             if (jsonNode.contains("Roof"))
                 node.Roof = jsonNode.at("Roof").get<int>();
 
-            replayData.Nodes.push_back(node);
+            replayData.mNodes.push_back(node);
         }
+        lock.~scoped_lock();
+
         replayData.SetFullyParsed(true);
         logger.Write(DEBUG, "[Replay-2] Parsed %s", mFileName.c_str());
     }
@@ -339,12 +285,12 @@ void CReplayData::Delete() const {
     std::filesystem::remove(std::filesystem::path(mFileName));
 }
 
-void CReplayData::CompleteRead() {
+void CReplayData::CompleteReadAsync() {
     if (FullyParsed())
         return;
 
     std::thread([this]() {
-        this->read();
+        this->completeRead();
     }).detach();
 }
 
