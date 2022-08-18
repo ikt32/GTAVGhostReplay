@@ -1018,7 +1018,7 @@ bool GhostReplay::EvaluateInput(std::string& searchFor) {
     PAD::DISABLE_ALL_CONTROL_ACTIONS(2);
 
     for (char c = ' '; c < '~'; c++) {
-        int key = str2key(std::string(1, c));
+        int key = NativeMenu::GetKeyFromName(std::string(1, c));
         if (key == -1) continue;
         if (IsKeyJustUp(key)) {
             searchFor += c;
@@ -1026,36 +1026,36 @@ bool GhostReplay::EvaluateInput(std::string& searchFor) {
         }
     }
 
-    if ((IsKeyDown(str2key("LSHIFT")) || IsKeyDown(str2key("RSHIFT"))) && IsKeyJustUp(str2key("VK_OEM_MINUS"))) {
+    if ((IsKeyDown(NativeMenu::GetKeyFromName("LSHIFT")) || IsKeyDown(NativeMenu::GetKeyFromName("RSHIFT"))) && IsKeyJustUp(NativeMenu::GetKeyFromName("VK_OEM_MINUS"))) {
         searchFor += '_';
         return true;
     }
-    if (IsKeyJustUp(str2key("VK_OEM_MINUS"))) {
+    if (IsKeyJustUp(NativeMenu::GetKeyFromName("VK_OEM_MINUS"))) {
         searchFor += '-';
         return true;
     }
-    if (IsKeyJustUp(str2key("SPACE"))) {
+    if (IsKeyJustUp(NativeMenu::GetKeyFromName("SPACE"))) {
         searchFor += ' ';
         return true;
     }
-    if (IsKeyJustUp(str2key("VK_OEM_COMMA"))) {
+    if (IsKeyJustUp(NativeMenu::GetKeyFromName("VK_OEM_COMMA"))) {
         searchFor += ',';
         return true;
     }
-    if (IsKeyJustUp(str2key("VK_OEM_PERIOD"))) {
+    if (IsKeyJustUp(NativeMenu::GetKeyFromName("VK_OEM_PERIOD"))) {
         searchFor += '.';
         return true;
     }
-    if ((IsKeyDown(str2key("LSHIFT")) || IsKeyDown(str2key("RSHIFT"))) && IsKeyJustUp(str2key("VK_OEM_1"))) {
+    if ((IsKeyDown(NativeMenu::GetKeyFromName("LSHIFT")) || IsKeyDown(NativeMenu::GetKeyFromName("RSHIFT"))) && IsKeyJustUp(NativeMenu::GetKeyFromName("VK_OEM_1"))) {
         searchFor += ':';
         return true;
     }
-    if (IsKeyJustUp(str2key("VK_OEM_1"))) {
+    if (IsKeyJustUp(NativeMenu::GetKeyFromName("VK_OEM_1"))) {
         searchFor += ';';
         return true;
     }
 
-    if (IsKeyJustUp(str2key("DELETE")) && !searchFor.empty()) {
+    if (IsKeyJustUp(NativeMenu::GetKeyFromName("DELETE")) && !searchFor.empty()) {
         searchFor.pop_back();
         return true;
     }
