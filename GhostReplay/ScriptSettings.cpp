@@ -68,6 +68,7 @@ void CScriptSettings::Load() {
     if (!driverModels.empty()) {
         Replay.DriverModels = Util::split(driverModels, ' ');
     }
+    LOAD_VAL("Replay", "EnableCollision", Replay.EnableCollision);
 
     // Correct invalid settings
     if (Main.ReplaySortBy < 0 || Main.ReplaySortBy > 2) {
@@ -132,6 +133,7 @@ void CScriptSettings::Save() {
 
     SAVE_VAL("Replay", "EnableDrivers", Replay.EnableDrivers);
     // DriverModels not editable in-game
+    SAVE_VAL("Replay", "EnableCollision", Replay.EnableCollision);
 
     result = ini.SaveFile(mSettingsFile.c_str());
     CHECK_LOG_SI_ERROR(result, "save");

@@ -950,6 +950,11 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
                 { "Uses these fallback models for drivers, if the recording doesn't have a driver.",
                   "Model is randomly picked." });
         }
+
+        mbCtx.BoolOption("Enable collision", GetSettings().Replay.EnableCollision,
+            { "Allow ghost cars to collide.",
+              "Warning: Performance impact if ghost vehicles overlap!",
+              "Use with caution." });
     });
 
     return submenus;

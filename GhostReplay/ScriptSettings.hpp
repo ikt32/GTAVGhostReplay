@@ -58,6 +58,7 @@ public:
         float SyncCompensation = 20.00f;
         bool EnableDrivers = false;
         std::vector<std::string> DriverModels;
+        bool EnableCollision = false;
     } Replay;
 
 private:

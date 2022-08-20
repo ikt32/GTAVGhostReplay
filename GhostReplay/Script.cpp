@@ -62,6 +62,11 @@ namespace {
 bool ShouldFindImpactsHook(uint64_t a1, uint64_t a2) {
     auto entity1 = *(unsigned int*)(a1 + 0x5C) | ((unsigned __int64)*(unsigned int*)(a1 + 0x4C) << 32);
     auto entity2 = *(unsigned int*)(a2 + 0x5C) | ((unsigned __int64)*(unsigned int*)(a2 + 0x4C) << 32);
+
+    if (settings && settings->Replay.EnableCollision) {
+        return ShouldFindImpactsOriginal(a1, a2);
+    }
+
     if (scriptInst) {
         auto playerVehicle = scriptInst->GetPlayerVehicle();
         auto addrPlayerVeh = mem::GetAddressOfEntity(playerVehicle);
