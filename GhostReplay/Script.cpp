@@ -47,6 +47,8 @@ namespace {
     std::vector<CTrackData> arsTracks;
     std::vector<CImage> trackImages;
 
+    void* fnAddr = nullptr;
+
     void clearFileFlags() {
         for (auto& track : tracks) {
             track.MarkedForDeletion = false;
@@ -94,12 +96,12 @@ bool ShouldFindImpactsHook(uint64_t a1, uint64_t a2) {
 void Dll::SetupHooks() {
     Driver::SetupHeadBlendDataFunctions();
 
-    auto addr = mem::FindPattern("48 8B C4 48 89 58 08 48 89 68 10 48 89 70 18 48 89 78 20 41 56 48 83 EC 20 48 8B EA 4C 8B F1 E8 ? ? ? ? 33 DB");
-    if (!addr) {
+    fnAddr = (void*)mem::FindPattern("48 8B C4 48 89 58 08 48 89 68 10 48 89 70 18 48 89 78 20 41 56 48 83 EC 20 48 8B EA 4C 8B F1 E8 ? ? ? ? 33 DB");
+    if (!fnAddr) {
         logger.Write(ERROR, "Couldn't find ShouldFindImpacts");
         return;
     }
-    logger.Write(DEBUG, "Found ShouldFindImpacts at 0x%p", addr);
+    logger.Write(DEBUG, "Found ShouldFindImpacts at 0x%p", fnAddr);
 
     auto result = MH_Initialize();
     if (result != MH_OK) {
@@ -107,7 +109,7 @@ void Dll::SetupHooks() {
         return;
     }
 
-    result = MH_CreateHook((LPVOID)addr, &ShouldFindImpactsHook, reinterpret_cast<LPVOID*>(&ShouldFindImpactsOriginal));
+    result = MH_CreateHook(fnAddr, &ShouldFindImpactsHook, reinterpret_cast<LPVOID*>(&ShouldFindImpactsOriginal));
     if (result != MH_OK) {
         logger.Write(ERROR, "MH_CreateHook failed: %d", result);
         return;
@@ -121,18 +123,11 @@ void Dll::SetupHooks() {
 }
 
 void Dll::ClearHooks() {
-    auto result = MH_DisableHook(MH_ALL_HOOKS);
-    if (result != MH_OK)
-    {
-        logger.Write(ERROR, "MH_DisableHook failed: %d", result);
+    if (!fnAddr)
         return;
-    }
-    result = MH_Uninitialize();
-    if (result != MH_OK)
-    {
-        logger.Write(ERROR, "MH_Uninitialize failed: %d", result);
-        return;
-    }
+    MH_DisableHook(MH_ALL_HOOKS);
+    MH_RemoveHook(fnAddr);
+    MH_Uninitialize();
 }
 
 void GhostReplay::ScriptMain() {
