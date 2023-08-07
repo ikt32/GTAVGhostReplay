@@ -4,7 +4,7 @@
 
 #include <inc/enums.h>
 #include <inc/natives.h>
-#include <fmt/format.h>
+#include <format>
 #include <vector>
 
 namespace {
@@ -43,7 +43,7 @@ void UI::Notify(const std::string& message, bool removePrevious) {
     if (removePrevious) {
         notifHandleAddr = &notificationId;
     }
-    showNotification(fmt::format("{}\n{}", Constants::NotificationPrefix, message), notifHandleAddr);
+    showNotification(std::format("{}\n{}", Constants::NotificationPrefix, message), notifHandleAddr);
 }
 
 void UI::ShowText(float x, float y, float scale, const std::string& text, int font, bool outline) {

@@ -1,6 +1,6 @@
 #include "ReplayScriptUtils.hpp"
 #include <inc/natives.h>
-#include <fmt/format.h>
+#include <format>
 
 #include <chrono>
 #include <iomanip>
@@ -26,7 +26,7 @@ std::string Util::FormatMillisTime(double totalTime) {
     unsigned long long milliseconds = timeMillis % 1000;
     unsigned long long seconds = (timeMillis / 1000) % 60;
     unsigned long long minutes = (timeMillis / 1000) / 60;
-    return fmt::format("{}:{:02d}.{:03d}", minutes, seconds, milliseconds);
+    return std::format("{}:{:02d}.{:03d}", minutes, seconds, milliseconds);
 }
 
 std::string Util::FormatReplayName(
@@ -35,7 +35,7 @@ std::string Util::FormatReplayName(
     const std::string& vehicleName) {
     std::string timeStr = Util::FormatMillisTime(totalTime);
 
-    return fmt::format("{} - {} - {}", trackName, vehicleName, timeStr);
+    return std::format("{} - {} - {}", trackName, vehicleName, timeStr);
 }
 
 std::string Util::GetVehicleName(Hash model) {
@@ -73,7 +73,7 @@ std::string Util::GetTimestampReadable(unsigned long long unixTimestampMs) {
     }
 
     timess << std::put_time(&newtime, "%Y %b %d, %H:%M:%S");
-    return fmt::format("{}", timess.str());
+    return std::format("{}", timess.str());
 }
 
 Vector3 Util::GroundZ(Vector3 v, float off) {

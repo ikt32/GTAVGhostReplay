@@ -39,9 +39,6 @@
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menucontrols.cpp">
       <Filter>ThirdParty\Menu</Filter>
     </ClCompile>
-    <ClCompile Include="..\thirdparty\fmt\src\format.cc">
-      <Filter>ThirdParty\fmt</Filter>
-    </ClCompile>
     <ClCompile Include="Util\UI.cpp">
       <Filter>Util</Filter>
     </ClCompile>
@@ -104,9 +101,6 @@
     </Filter>
     <Filter Include="ThirdParty\Menu">
       <UniqueIdentifier>{c8b2b130-a6aa-456a-b13e-953b855d0cbd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ThirdParty\fmt">
-      <UniqueIdentifier>{553a292e-ab0e-42df-8194-0697cb1e9ac3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Compatibility">
       <UniqueIdentifier>{99b8860a-eccb-462b-aba5-c6127d3ec17d}</UniqueIdentifier>

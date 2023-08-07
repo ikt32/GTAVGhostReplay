@@ -6,7 +6,7 @@
 #include "Script.hpp"
 
 #include <nlohmann/json.hpp>
-#include <fmt/format.h>
+#include <format>
 #include <filesystem>
 #include <fstream>
 #include <thread>
@@ -164,16 +164,16 @@ void CReplayData::generateFileName() {
     unsigned count = 0;
     std::string suffix;
 
-    while (std::filesystem::exists(fmt::format("{}\\{}{}.json", replaysPath, cleanName, suffix))) {
+    while (std::filesystem::exists(std::format("{}\\{}{}.json", replaysPath, cleanName, suffix))) {
         if (suffix.empty()) {
             suffix = "_0";
         }
         else {
-            suffix = fmt::format("_{}", ++count);
+            suffix = std::format("_{}", ++count);
         }
     }
 
-    mFileName = fmt::format("{}\\{}{}.json", replaysPath, cleanName, suffix);
+    mFileName = std::format("{}\\{}{}.json", replaysPath, cleanName, suffix);
 }
 
 void CReplayData::WriteAsync(CReplayData& replayData) {

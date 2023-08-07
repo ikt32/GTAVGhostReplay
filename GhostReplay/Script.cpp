@@ -16,7 +16,7 @@
 #include <inc/natives.h>
 #include <inc/main.h>
 #include <MinHook.h>
-#include <fmt/format.h>
+#include <format>
 #include <memory>
 #include <filesystem>
 #include <thread>

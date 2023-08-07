@@ -1,7 +1,7 @@
 #include "Game.hpp"
 #include "Math.hpp"
 #include "UI.hpp"
-#include <fmt/format.h>
+#include <format>
 
 namespace Util {
     bool VehicleAvailable(Vehicle vehicle, Ped playerPed, bool checkSeat) {
@@ -114,7 +114,7 @@ namespace Util {
                 // Couldn't load model
                 WAIT(0);
                 STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
-                std::string msg = fmt::format("Error: Failed to load model 0x{:08X}.", model);
+                std::string msg = std::format("Error: Failed to load model 0x{:08X}.", model);
                 UI::Notify(msg, false);
                 return 0;
             }

@@ -5,7 +5,7 @@
 #include "ReplayScriptUtils.hpp"
 
 #include <nlohmann/json.hpp>
-#include <fmt/format.h>
+#include <format>
 #include <filesystem>
 #include <fstream>
 
@@ -84,7 +84,7 @@ void CTrackData::Write() {
 
     std::string cleanName = Util::StripString(Name);
 
-    const std::string trackFileName = fmt::format("{}\\{}.json", tracksPath, cleanName);
+    const std::string trackFileName = std::format("{}\\{}.json", tracksPath, cleanName);
 
     std::ofstream trackFile(trackFileName);
     trackFile << std::setw(2) << trackJson << std::endl;

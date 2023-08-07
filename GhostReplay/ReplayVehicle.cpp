@@ -8,7 +8,7 @@
 #include "Util/Random.hpp"
 #include "Memory/VehicleExtensions.hpp"
 #include <inc/natives.h>
-#include <fmt/format.h>
+#include <format>
 
 using VExt = VehicleExtensions;
 
@@ -270,7 +270,7 @@ void CReplayVehicle::showNode(
         switch (mSettings.Replay.SyncType) {
             case ESyncType::Distance: syncType = "Distance"; break;
             case ESyncType::Constant: syncType = "Constant"; break;
-            default: syncType = fmt::format("Invalid: {}", mSettings.Replay.SyncType);
+            default: syncType = std::format("Invalid: {}", std::to_underlying(mSettings.Replay.SyncType));
         }
         Vector3 vehUp = posEntity;
         Vector3 dimMin, dimMax;
@@ -279,9 +279,9 @@ void CReplayVehicle::showNode(
         UI::ShowText3D(vehUp, 10.0f, {
             Util::FormatMillisTime(mActiveReplay->Nodes.back().Timestamp),
             Util::FormatMillisTime(GetReplayProgress()),
-            fmt::format("Type: {}", syncType),
-            fmt::format("Limit: {:.3f}", mSettings.Replay.SyncDistance),
-            fmt::format("Drift: {:.3f}", dist),
+            std::format("Type: {}", syncType),
+            std::format("Limit: {:.3f}", mSettings.Replay.SyncDistance),
+            std::format("Drift: {:.3f}", dist),
         });
     }
 
@@ -432,15 +432,15 @@ void CReplayVehicle::createReplayVehicle(Hash model, CReplayData* activeReplay, 
     if (!(STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))) {
         // Vehicle doesn't exist
         std::string msg =
-            fmt::format("Error: Couldn't find model 0x{:08X}. Falling back to ({}).", model, fallbackModelName);
+            std::format("Error: Couldn't find model 0x{:08X}. Falling back to ({}).", model, fallbackModelName);
         UI::Notify(msg, false);
-        logger.Write(ERROR, fmt::format("[Replay] {}", msg));
+        logger.Write(ERROR, std::format("[Replay] {}", msg));
 
         model = MISC::GET_HASH_KEY(fallbackModelName);
         if (!(STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))) {
             msg = "Error: Failed to find fallback model.";
             UI::Notify(msg, false);
-            logger.Write(ERROR, fmt::format("[Replay] {}", msg));
+            logger.Write(ERROR, std::format("[Replay] {}", msg));
             return;
         }
     }
@@ -473,7 +473,7 @@ void CReplayVehicle::createReplayPed() {
         mSettings.Replay.DriverModels.empty()) {
         std::string msg = "Error: No ped models available, skipping ped creation.";
         UI::Notify(msg, false);
-        logger.Write(ERROR, fmt::format("[Replay] {}", msg));
+        logger.Write(ERROR, std::format("[Replay] {}", msg));
         mReplayPed = 0;
         return;
     }
@@ -507,10 +507,10 @@ void CReplayVehicle::createReplayPed() {
     
     if (!validModel) {
         std::string msg =
-            fmt::format("Error: Couldn't find ped model 0x{:08X} or 0x{:08X}. Skipping ped creation.",
+            std::format("Error: Couldn't find ped model 0x{:08X} or 0x{:08X}. Skipping ped creation.",
                 mActiveReplay->ReplayDriver.Model, randomModel);
         UI::Notify(msg, false);
-        logger.Write(ERROR, fmt::format("[Replay] {}", msg));
+        logger.Write(ERROR, std::format("[Replay] {}", msg));
         mReplayPed = 0;
         return;
     }
@@ -523,9 +523,9 @@ void CReplayVehicle::createReplayPed() {
             // Couldn't load model
             WAIT(0);
             STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
-            std::string msg = fmt::format("Error: Failed to load ped model 0x{:08X}.", model);
+            std::string msg = std::format("Error: Failed to load ped model 0x{:08X}.", model);
             UI::Notify(msg, false);
-            logger.Write(ERROR, fmt::format("[Replay] {}", msg));
+            logger.Write(ERROR, std::format("[Replay] {}", msg));
             return;
         }
     }
@@ -560,7 +560,7 @@ void CReplayVehicle::createBlip() {
     mReplayVehicleBlip = std::make_unique<CWrappedBlip>(
         mReplayVehicle,
         blipSprite,
-        fmt::format("Replay - {} ({})",
+        std::format("Replay - {} ({})",
             Util::GetVehicleName(mActiveReplay->VehicleModel),
             Util::FormatMillisTime(mActiveReplay->Nodes.back().Timestamp)),
         eBlipColor::BlipColorWhite, true);

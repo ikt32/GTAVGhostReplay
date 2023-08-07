@@ -3,12 +3,12 @@
 #include "Util/UI.hpp"
 
 #include <inc/natives.h>
-#include <fmt/format.h>
+#include <format>
 
 bool MenuUtils::GetKbInt(int& val) {
     UI::Notify("Enter value", true);
     MISC::DISPLAY_ONSCREEN_KEYBOARD(LOCALIZATION::GET_CURRENT_LANGUAGE() == 0, "FMMC_KEY_TIP8", "",
-        fmt::format("{}", val).c_str(), "", "", "", 64);
+        std::format("{}", val).c_str(), "", "", "", 64);
     while (MISC::UPDATE_ONSCREEN_KEYBOARD() == 0) {
         WAIT(0);
     }
@@ -38,7 +38,7 @@ bool MenuUtils::GetKbInt(int& val) {
 bool MenuUtils::GetKbFloat(float& val) {
     UI::Notify("Enter value", true);
     MISC::DISPLAY_ONSCREEN_KEYBOARD(LOCALIZATION::GET_CURRENT_LANGUAGE() == 0, "FMMC_KEY_TIP8", "",
-        fmt::format("{:f}", val).c_str(), "", "", "", 64);
+        std::format("{:f}", val).c_str(), "", "", "", 64);
     while (MISC::UPDATE_ONSCREEN_KEYBOARD() == 0) {
         WAIT(0);
     }
@@ -68,7 +68,7 @@ bool MenuUtils::GetKbFloat(float& val) {
 bool MenuUtils::GetKbString(std::string& val) {
     UI::Notify("Enter name", true);
     MISC::DISPLAY_ONSCREEN_KEYBOARD(LOCALIZATION::GET_CURRENT_LANGUAGE() == 0, "FMMC_KEY_TIP8", "",
-        fmt::format("{}", val).c_str(), "", "", "", 64);
+        std::format("{}", val).c_str(), "", "", "", 64);
     while (MISC::UPDATE_ONSCREEN_KEYBOARD() == 0) {
         WAIT(0);
     }

@@ -3,7 +3,7 @@
 #include "Memory/Versions.hpp"
 
 #include <inc/natives.h>
-#include <fmt/format.h>
+#include <format>
 
 namespace VEHICLE {
     // b877

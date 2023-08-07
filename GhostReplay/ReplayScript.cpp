@@ -17,7 +17,7 @@
 
 #include <inc/enums.h>
 #include <inc/natives.h>
-#include <fmt/format.h>
+#include <format>
 #include <filesystem>
 #include <algorithm>
 
@@ -287,9 +287,9 @@ bool CReplayScript::StartLineDef(SLineDef& lineDef, const std::string& lineName)
             }
         }
 
-        std::string currentStepName = fmt::format("{} {} point", progress == 0 ? "left" : "right", lineName);
+        std::string currentStepName = std::format("{} {} point", progress == 0 ? "left" : "right", lineName);
 
-        UI::ShowHelpText(fmt::format(
+        UI::ShowHelpText(std::format(
             "Press {} to register {} at your current location. "
             "Press {} to cancel and exit.", 
             Inputs::GetControlString(registerControl), currentStepName,
@@ -310,7 +310,7 @@ void CReplayScript::DeleteTrack(const CTrackData& track) {
     if (trackIt == mTracks.end()) {
         logger.Write(ERROR, "[Track] Attempted to delete track [%s] but didn't find it in the list? Filename: [%s]",
             track.Name.c_str(), track.FileName().c_str());
-        UI::Notify(fmt::format("[Track] Failed to delete {}", track.Name));
+        UI::Notify(std::format("[Track] Failed to delete {}", track.Name));
         return;
     }
 
@@ -337,14 +337,14 @@ void CReplayScript::DeleteReplay(const CReplayData& replay) {
     if (replayIt == mReplays.end()) {
         logger.Write(ERROR, "[Replay] Attempted to delete replay [%s] but didn't find it in the list? Filename: [%s]",
             replay.Name.c_str(), replay.FileName().c_str());
-        UI::Notify(fmt::format("[Replay] Failed to delete {}", replay.Name));
+        UI::Notify(std::format("[Replay] Failed to delete {}", replay.Name));
         return;
     }
     
     if (replayCompIt == mCompatibleReplays.end()) {
         logger.Write(ERROR, "[Replay] Attempted to delete replay [%s] but didn't find it in the compatible list? Filename: [%s]",
             replay.Name.c_str(), replay.FileName().c_str());
-        UI::Notify(fmt::format("[Replay] Failed to delete {}", replay.Name));
+        UI::Notify(std::format("[Replay] Failed to delete {}", replay.Name));
         return;
     }
 
@@ -364,7 +364,7 @@ std::string CReplayScript::GetTrackImageMenuString(const std::string& trackName)
     });
 
     if (imgIt != mTrackImages.end()) {
-        extra = fmt::format("{}W{}H{}",
+        extra = std::format("{}W{}H{}",
             imgIt->TextureID,
             imgIt->ResX,
             imgIt->ResY);
@@ -764,7 +764,7 @@ void CReplayScript::updateReplay() {
     for (const auto& replayVehicle : mReplayVehicles) {
         if (!ENTITY::DOES_ENTITY_EXIST(replayVehicle->GetVehicle())) {
             replayVehiclesToDelete.push_back(replayVehicle.get());
-            logger.Write(ERROR, fmt::format("[Replay] Managed vehicle {} with ID {:08X} stopped existing. "
+            logger.Write(ERROR, std::format("[Replay] Managed vehicle {} with ID {:08X} stopped existing. "
                 "Another script likely forcefully removed it. "
                 "Deselected replay to prevent crashes.",
                 Util::GetVehicleName(replayVehicle->GetReplay()->VehicleModel),
@@ -788,7 +788,7 @@ void CReplayScript::updateReplay() {
                 if (mSettings.Main.Debug) {
                     UI::DrawLine(playerPos, ghostPos, 255, 0, 0, 255);
                     UI::ShowText3D((playerPos + ghostPos) * 0.5f, 10.0f, {
-                        fmt::format("{:.2f}m", Distance(playerPos, ghostPos)),
+                        std::format("{:.2f}m", Distance(playerPos, ghostPos)),
                     });
                 }
             }
@@ -995,7 +995,7 @@ void CReplayScript::finishRecord(bool saved, const SReplayNode& node) {
         mUnsavedRuns.push_back(mCurrentRun);
     }
 
-    std::string lapInfo = fmt::format("Lap time: {}{}",
+    std::string lapInfo = std::format("Lap time: {}{}",
                                       fastestLap ? "~p~" : fasterLap ? "~g~" : "~y~",
                                       Util::FormatMillisTime(node.Timestamp));
 
@@ -1054,9 +1054,9 @@ void CReplayScript::createPtfx(const CTrackData& trackData) {
         WAIT(0);
         if (GetTickCount64() > startTime + 5000) {
             WAIT(0);
-            std::string msg = fmt::format("Error: Failed to load flare assets.");
+            std::string msg = std::format("Error: Failed to load flare assets.");
             UI::Notify(msg, false);
-            logger.Write(ERROR, fmt::format("[Replay] {}", msg));
+            logger.Write(ERROR, std::format("[Replay] {}", msg));
             return;
         }
     }
@@ -1094,7 +1094,7 @@ void CReplayScript::createTrackBlips(const CTrackData& trackData) {
     float blipDist = Distance(startBlipCoord, finishBlipCoord);
     bool showFinish = blipDist > 5.0f;
 
-    std::string startName = showFinish ? fmt::format("{} (Start)", trackData.Name) : trackData.Name;
+    std::string startName = showFinish ? std::format("{} (Start)", trackData.Name) : trackData.Name;
     eBlipColor startColor = showFinish ? eBlipColor::BlipColorBlue : eBlipColor::BlipColorWhite;
 
     mStartBlip = std::make_unique<CWrappedBlip>(
@@ -1107,7 +1107,7 @@ void CReplayScript::createTrackBlips(const CTrackData& trackData) {
         mFinishBlip = std::make_unique<CWrappedBlip>(
             finishBlipCoord,
             eBlipSprite::BlipSpriteRaceFinish,
-            fmt::format("{} (Finish)", trackData.Name),
+            std::format("{} (Finish)", trackData.Name),
             eBlipColor::BlipColorWhite);
     }
 }

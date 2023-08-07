@@ -1,6 +1,5 @@
 #include "String.hpp"
 
-#include <fmt/format.h>
 #include <sstream>
 #include <algorithm>
 

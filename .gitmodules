@@ -4,9 +4,6 @@
 [submodule "thirdparty/GTAVMenuBase"]
 	path = thirdparty/GTAVMenuBase
 	url = https://github.com/E66666666/GTAVMenuBase
-[submodule "thirdparty/fmt"]
-	path = thirdparty/fmt
-	url = https://github.com/fmtlib/fmt
 [submodule "thirdparty/pugixml"]
 	path = thirdparty/pugixml
 	url = https://github.com/zeux/pugixml
