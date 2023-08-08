@@ -39,7 +39,13 @@ void CScriptSettings::Load() {
     //LOAD_VAL("Main", "RagePresence", Main.RagePresence);
     LOAD_VAL("Main", "Debug", Main.Debug);
 
-    LOAD_VAL("Record", "AutoGhost", Record.AutoGhost);
+    LOAD_VAL("Record", "AutoGhost", Record.AutoGhostFast);
+    LOAD_VAL("Record", "AutoGhostAll", Record.AutoGhostAll);
+
+    if (Record.AutoGhostFast && Record.AutoGhostAll) {
+        Record.AutoGhostAll = false;
+    }
+
     LOAD_VAL("Record", "DeltaMillis", Record.DeltaMillis);
     LOAD_VAL("Record", "ReduceFileSize", Record.ReduceFileSize);
 
@@ -108,7 +114,9 @@ void CScriptSettings::Save() {
     //SAVE_VAL("Main", "RagePresence", Main.RagePresence);
     SAVE_VAL("Main", "Debug", Main.Debug);
 
-    SAVE_VAL("Record", "AutoGhost", Record.AutoGhost);
+    SAVE_VAL("Record", "AutoGhost", Record.AutoGhostFast);
+    SAVE_VAL("Record", "AutoGhostAll", Record.AutoGhostAll);
+
     SAVE_VAL("Record", "DeltaMillis", Record.DeltaMillis);
     SAVE_VAL("Record", "ReduceFileSize", Record.ReduceFileSize);
 

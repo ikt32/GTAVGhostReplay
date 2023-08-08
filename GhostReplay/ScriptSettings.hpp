@@ -28,7 +28,8 @@ public:
     } Main;
 
     struct {
-        bool AutoGhost = true;
+        bool AutoGhostFast = true;
+        bool AutoGhostAll = false;
         int DeltaMillis = 0;
         bool ReduceFileSize = true;
         struct {

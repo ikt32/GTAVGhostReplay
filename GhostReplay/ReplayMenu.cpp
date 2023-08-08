@@ -828,9 +828,34 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
         mbCtx.Title("Recording settings");
         mbCtx.Subtitle("");
 
-        mbCtx.BoolOption("Automatically save faster laps", GetSettings().Record.AutoGhost,
-            { "Laps faster than the current playing ghost file, are saved automatically.",
-              "Only active when one ghost is selected." });
+        const std::string AutoGhostFasterOption = "Automatically save lap (faster)";
+        const std::string AutoGhostAllOption = "Automatically save lap (all)";
+
+        const std::vector<std::string> AutoGhostFasterExtra =
+        { "Laps faster than the current playing ghost file, are saved automatically.",
+          std::format("Not compatible with \"{}\"", AutoGhostAllOption) };
+
+        const std::vector<std::string> AutoGhostAllExtra =
+        { "Laps are saved automatically.",
+          std::format("Not compatible with \"{}\"", AutoGhostFasterOption) };
+
+        if (!GetSettings().Record.AutoGhostAll) {
+            mbCtx.BoolOption(AutoGhostFasterOption, GetSettings().Record.AutoGhostFast,
+                AutoGhostFasterExtra);
+        }
+        else {
+            mbCtx.Option(std::format("~g~{}", AutoGhostFasterOption),
+                AutoGhostFasterExtra);
+        }
+
+        if (!GetSettings().Record.AutoGhostFast) {
+            mbCtx.BoolOption(AutoGhostAllOption, GetSettings().Record.AutoGhostAll,
+                AutoGhostAllExtra);
+        }
+        else {
+            mbCtx.Option(std::format("~g~{}", AutoGhostAllOption),
+                AutoGhostAllExtra);
+        }
 
         std::vector<std::string> timestepDescr{
             "The minimum time in milliseconds between each ghost recording sample.",
