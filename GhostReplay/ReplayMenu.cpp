@@ -832,11 +832,12 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
         const std::string AutoGhostAllOption = "Automatically save lap (all)";
 
         const std::vector<std::string> AutoGhostFasterExtra =
-        { "Laps faster than the current playing ghost file, are saved automatically.",
+        { "Laps faster than the current playing ghost are saved automatically.",
           std::format("Not compatible with \"{}\"", AutoGhostAllOption) };
 
         const std::vector<std::string> AutoGhostAllExtra =
         { "Laps are saved automatically.",
+          "Select two or more replays to stack new recordings on top.",
           std::format("Not compatible with \"{}\"", AutoGhostFasterOption) };
 
         if (!GetSettings().Record.AutoGhostAll) {
@@ -844,7 +845,7 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
                 AutoGhostFasterExtra);
         }
         else {
-            mbCtx.Option(std::format("~g~{}", AutoGhostFasterOption),
+            mbCtx.Option(std::format("~m~{}", AutoGhostFasterOption),
                 AutoGhostFasterExtra);
         }
 
@@ -853,7 +854,7 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
                 AutoGhostAllExtra);
         }
         else {
-            mbCtx.Option(std::format("~g~{}", AutoGhostAllOption),
+            mbCtx.Option(std::format("~m~{}", AutoGhostAllOption),
                 AutoGhostAllExtra);
         }
 
