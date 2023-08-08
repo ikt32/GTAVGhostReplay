@@ -106,6 +106,7 @@
     <ClCompile Include="Blip.cpp" />
     <ClCompile Include="Compatibility.cpp" />
     <ClCompile Include="Image.cpp" />
+    <ClCompile Include="Impacts.cpp" />
     <ClCompile Include="ReplayDriver.cpp" />
     <ClCompile Include="ReplayData.cpp" />
     <ClCompile Include="DllMain.cpp" />
@@ -150,6 +151,7 @@
     <ClInclude Include="Blip.hpp" />
     <ClInclude Include="Compatibility.hpp" />
     <ClInclude Include="Image.hpp" />
+    <ClInclude Include="Impacts.hpp" />
     <ClInclude Include="ReplayDriver.hpp" />
     <ClInclude Include="ReplayData.hpp" />
     <ClInclude Include="Constants.hpp" />

@@ -3,6 +3,7 @@
 #include "ReplayScript.hpp"
 #include "Constants.hpp"
 #include "GitInfo.h"
+#include "Impacts.hpp"
 
 #include "TrackData.hpp"
 #include "ReplayData.hpp"
@@ -977,10 +978,18 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
                   "Model is randomly picked." });
         }
 
-        mbCtx.BoolOption("Enable collision", GetSettings().Replay.EnableCollision,
-            { "Allow ghost cars to collide.",
+        std::vector<std::string> collisionDescription = { "Allow ghost cars to collide.",
               "Warning: Performance impact if ghost vehicles overlap!",
-              "Use with caution." });
+              "Use with caution." };
+
+        if (!Impacts::Found()) {
+            collisionDescription.insert(collisionDescription.begin(),
+                { "~r~Unable to patch collisions, collisions currently always enabled!" });
+        }
+
+        mbCtx.BoolOption(std::format("{}Enable collision", Impacts::Found() ? "" : "~r~"),
+            GetSettings().Replay.EnableCollision,
+            collisionDescription);
     });
 
     return submenus;

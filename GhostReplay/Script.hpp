@@ -9,6 +9,7 @@ namespace GhostReplay {
 
     std::vector<CScriptMenu<CReplayScript>::CSubmenu> BuildMenu();
 
+    bool HasSettings();
     CScriptSettings& GetSettings();
 
     CReplayScript* GetScript();

@@ -4,6 +4,7 @@
 #include "ScriptMenu.hpp"
 #include "Constants.hpp"
 #include "Compatibility.hpp"
+#include "Impacts.hpp"
 #include "ReplayDriver.hpp"
 
 #include "Memory/VehicleExtensions.hpp"
@@ -15,7 +16,6 @@
 
 #include <inc/natives.h>
 #include <inc/main.h>
-#include <MinHook.h>
 #include <format>
 #include <memory>
 #include <filesystem>
@@ -24,10 +24,6 @@
 
 using namespace GhostReplay;
 namespace fs = std::filesystem;
-
-// Thanks @Dot.!
-typedef bool (*ShouldFindImpacts_t)(uint64_t, uint64_t);
-ShouldFindImpacts_t ShouldFindImpactsOriginal = nullptr;
 
 namespace {
     std::shared_ptr<CScriptSettings> settings;
@@ -47,8 +43,6 @@ namespace {
     std::vector<CTrackData> arsTracks;
     std::vector<CImage> trackImages;
 
-    void* fnAddr = nullptr;
-
     void clearFileFlags() {
         for (auto& track : tracks) {
             track.MarkedForDeletion = false;
@@ -61,73 +55,13 @@ namespace {
     }
 }
 
-bool ShouldFindImpactsHook(uint64_t a1, uint64_t a2) {
-    auto entity1 = *(unsigned int*)(a1 + 0x5C) | ((unsigned __int64)*(unsigned int*)(a1 + 0x4C) << 32);
-    auto entity2 = *(unsigned int*)(a2 + 0x5C) | ((unsigned __int64)*(unsigned int*)(a2 + 0x4C) << 32);
-
-    if (settings && settings->Replay.EnableCollision) {
-        return ShouldFindImpactsOriginal(a1, a2);
-    }
-
-    if (scriptInst) {
-        auto playerVehicle = scriptInst->GetPlayerVehicle();
-        auto addrPlayerVeh = mem::GetAddressOfEntity(playerVehicle);
-        int matched = 0;
-
-        bool playerInComparison = addrPlayerVeh == entity1 || addrPlayerVeh == entity2;
-        bool playerInGhost = scriptInst->IsPassengerModeActive();
-
-        for (const auto& replayVehicle : scriptInst->GetReplayVehicles()) {
-            if (replayVehicle->GetReplayState() == EReplayState::Idle)
-                continue;
-            auto addrReplayVeh = mem::GetAddressOfEntity(replayVehicle->GetVehicle());
-            if (addrReplayVeh == entity1 ||
-                addrReplayVeh == entity2)
-                matched++;
-
-            if (matched == 2 || matched >= 1 && playerInComparison && !playerInGhost)
-                return false;
-        }
-    }
-
-    return ShouldFindImpactsOriginal(a1, a2);
-}
-
 void Dll::SetupHooks() {
     Driver::SetupHeadBlendDataFunctions();
-
-    fnAddr = (void*)mem::FindPattern("48 8B C4 48 89 58 08 48 89 68 10 48 89 70 18 48 89 78 20 41 56 48 83 EC 20 48 8B EA 4C 8B F1 E8 ? ? ? ? 33 DB");
-    if (!fnAddr) {
-        logger.Write(ERROR, "Couldn't find ShouldFindImpacts");
-        return;
-    }
-    logger.Write(DEBUG, "Found ShouldFindImpacts at 0x%p", fnAddr);
-
-    auto result = MH_Initialize();
-    if (result != MH_OK) {
-        logger.Write(ERROR, "MH_Initialize failed: %d", result);
-        return;
-    }
-
-    result = MH_CreateHook(fnAddr, &ShouldFindImpactsHook, reinterpret_cast<LPVOID*>(&ShouldFindImpactsOriginal));
-    if (result != MH_OK) {
-        logger.Write(ERROR, "MH_CreateHook failed: %d", result);
-        return;
-    }
-
-    result = MH_EnableHook(MH_ALL_HOOKS);
-    if (result != MH_OK) {
-        logger.Write(ERROR, "MH_EnableHook failed: %d", result);
-        return;
-    }
+    Impacts::Setup();
 }
 
 void Dll::ClearHooks() {
-    if (!fnAddr)
-        return;
-    MH_DisableHook(MH_ALL_HOOKS);
-    MH_RemoveHook(fnAddr);
-    MH_Uninitialize();
+    Impacts::Clear();
 }
 
 void GhostReplay::ScriptMain() {
@@ -178,6 +112,10 @@ void GhostReplay::ScriptMain() {
         menu.Tick(*scriptInst);
         WAIT(0);
     }
+}
+
+bool GhostReplay::HasSettings() {
+    return settings != nullptr;
 }
 
 CScriptSettings& GhostReplay::GetSettings() {
