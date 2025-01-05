@@ -15,9 +15,9 @@ struct V3D {
     V3D() = default;
     Vector3 to_v3f() {
         Vector3 v{
-            static_cast<float>(x), 0,
-            static_cast<float>(y), 0,
-            static_cast<float>(z), 0
+            static_cast<float>(x),
+            static_cast<float>(y),
+            static_cast<float>(z),
         };
         return v;
     }
@@ -83,9 +83,9 @@ T lerp(T a, T b, T2 f, T2 min, T2 max) {
 
 inline Vector3 lerp(Vector3 a, Vector3 b, float f, float min, float max) {
     return Vector3{
-        lerp(a.x, b.x, f, min, max), 0,
-        lerp(a.y, b.y, f, min, max), 0,
-        lerp(a.z, b.z, f, min, max), 0,
+        lerp(a.x, b.x, f, min, max),
+        lerp(a.y, b.y, f, min, max),
+        lerp(a.z, b.z, f, min, max),
     };
 }
 
@@ -180,7 +180,7 @@ Vector3T GetOffsetInWorldCoords(Vector3T position, Vector3T rotation, Vector3T f
     auto x = num1 * cos(-rotation.z);
     auto y = num1 * sin(rotation.z);
     auto z = sin(-rotation.y);
-    Vector3 right = { x, 0, y, 0, z, 0 };
+    Vector3 right = { x, y, z };
     Vector3 up = Cross(right, forward);
     return position + (right * offset.x) + (forward * offset.y) + (up * offset.z);
 }
@@ -252,8 +252,8 @@ inline bool operator!=(const Vector3& lhs, const Vector3& rhs) {
 
 inline float GetAngleABC(Vector3 a, Vector3 b, Vector3 c)
 {
-    Vector3 ab = { b.x - a.x, 0, b.y - a.y };
-    Vector3 cb = { b.x - c.x, 0, b.y - c.y };
+    Vector3 ab = { b.x - a.x, b.y - a.y, 0 };
+    Vector3 cb = { b.x - c.x, b.y - c.y, 0 };
 
     float dot = (ab.x * cb.x + ab.y * cb.y); // dot product
     float cross = (ab.x * cb.y - ab.y * cb.x); // cross product

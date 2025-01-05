@@ -8,7 +8,7 @@
 #define VERIFY_NODE(parent, node, name) \
     parent.child((name)); \
     if (!(node)) {\
-        logger.Write(ERROR, "[XML %s] Missing node [%s]", (trackFile.c_str()), (name));\
+        LOG(Error, "[XML {}] Missing node [{}]", (trackFile), (name));\
         goto errorHandling;\
     }
 
@@ -36,9 +36,9 @@ CTrackData CTrackData::ReadARS(const std::string& trackFile) {
             auto wNode = VERIFY_NODE(pointNode, wNode, "Wide");
 
             Vector3 v{
-                xNode.text().as_float(), 0,
-                yNode.text().as_float(), 0,
-                zNode.text().as_float(), 0 };
+                xNode.text().as_float(),
+                yNode.text().as_float(),
+                zNode.text().as_float()};
             Point p{};
             p.v = v;
             p.w = wNode.text().as_float();
@@ -46,7 +46,7 @@ CTrackData CTrackData::ReadARS(const std::string& trackFile) {
         }
 
         if (trackCoords.size() < 10) {
-            logger.Write(ERROR, "[Track-ARS] < 10 points (%d), unlikely a proper track", trackCoords.size());
+            LOG(Error, "[Track-ARS] < 10 points ({}), unlikely a proper track", trackCoords.size());
             goto errorHandling;
         }
 
@@ -94,13 +94,13 @@ CTrackData CTrackData::ReadARS(const std::string& trackFile) {
             trackData.FinishLine.A = ccwFinish;
             trackData.FinishLine.B = cwFinish;
         }
-        logger.Write(DEBUG, "[Track-ARS] Parsed %s", trackFile.c_str());
+        LOG(Debug, "[Track-ARS] Parsed {}", trackFile);
     }
     else {
 errorHandling:
-        logger.Write(ERROR, "[Track-ARS] XML [%s] parsed with errors", trackFile.c_str());
-        logger.Write(ERROR, "    Error: %s", result.description());
-        logger.Write(ERROR, "    Offset: %td", result.offset);
+        LOG(Error, "[Track-ARS] XML [{}] parsed with errors", trackFile);
+        LOG(Error, "    Error: {}", result.description());
+        LOG(Error, "    Offset: {}", result.offset);
     }
     return trackData;
 }

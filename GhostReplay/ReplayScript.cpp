@@ -119,7 +119,7 @@ void CReplayScript::SetTrack(const std::string& trackName) {
         return;
     }
 
-    logger.Write(ERROR, "SetTrack: No track found with the name [%s]", trackName.c_str());
+    LOG(Error, "SetTrack: No track found with the name [{}]", trackName);
 }
 
 void CReplayScript::SelectReplay(const std::string& replayName, unsigned long long timestamp) {
@@ -155,7 +155,7 @@ void CReplayScript::SelectReplay(const std::string& replayName, unsigned long lo
         mRecordState = ERecordState::Idle;
         return;
     }
-    logger.Write(ERROR, "SetReplay: No replay found with the name [%s]", replayName.c_str());
+    LOG(Error, "SetReplay: No replay found with the name [{}]", replayName);
 }
 
 void CReplayScript::DeselectReplay(const std::string& replayName, unsigned long long timestamp) {
@@ -308,8 +308,8 @@ void CReplayScript::DeleteTrack(const CTrackData& track) {
     });
 
     if (trackIt == mTracks.end()) {
-        logger.Write(ERROR, "[Track] Attempted to delete track [%s] but didn't find it in the list? Filename: [%s]",
-            track.Name.c_str(), track.FileName().c_str());
+        LOG(Error, "[Track] Attempted to delete track [{}] but didn't find it in the list? Filename: [{}]",
+            track.Name, track.FileName());
         UI::Notify(std::format("[Track] Failed to delete {}", track.Name));
         return;
     }
@@ -321,8 +321,8 @@ void CReplayScript::DeleteTrack(const CTrackData& track) {
     }
     track.Delete();
     mTracks.erase(trackIt);
-    logger.Write(INFO, "[Track] Deleted track [%s], Filename: [%s]",
-        track.Name.c_str(), track.FileName().c_str());
+    LOG(Info, "[Track] Deleted track [{}], Filename: [{}]",
+        track.Name, track.FileName());
 }
 
 void CReplayScript::DeleteReplay(const CReplayData& replay) {
@@ -335,15 +335,15 @@ void CReplayScript::DeleteReplay(const CReplayData& replay) {
     });
 
     if (replayIt == mReplays.end()) {
-        logger.Write(ERROR, "[Replay] Attempted to delete replay [%s] but didn't find it in the list? Filename: [%s]",
-            replay.Name.c_str(), replay.FileName().c_str());
+        LOG(Error, "[Replay] Attempted to delete replay [{}] but didn't find it in the list? Filename: [{}]",
+            replay.Name, replay.FileName());
         UI::Notify(std::format("[Replay] Failed to delete {}", replay.Name));
         return;
     }
     
     if (replayCompIt == mCompatibleReplays.end()) {
-        logger.Write(ERROR, "[Replay] Attempted to delete replay [%s] but didn't find it in the compatible list? Filename: [%s]",
-            replay.Name.c_str(), replay.FileName().c_str());
+        LOG(Error, "[Replay] Attempted to delete replay [{}] but didn't find it in the compatible list? Filename: [{}]",
+            replay.Name, replay.FileName());
         UI::Notify(std::format("[Replay] Failed to delete {}", replay.Name));
         return;
     }
@@ -352,8 +352,8 @@ void CReplayScript::DeleteReplay(const CReplayData& replay) {
     replay.Delete();
     mReplays.erase(replayIt);
     mCompatibleReplays.erase(replayCompIt);
-    logger.Write(INFO, "[Replay] Deleted replay [%s], Filename: [%s]",
-        replay.Name.c_str(), replay.FileName().c_str());
+    LOG(Info, "[Replay] Deleted replay [{}], Filename: [{}]",
+        replay.Name, replay.FileName());
 }
 
 std::string CReplayScript::GetTrackImageMenuString(const std::string& trackName) {
@@ -404,7 +404,7 @@ void CReplayScript::ActivatePassengerMode() {
 
         auto pos = ENTITY::GET_ENTITY_COORDS(playerVehicle, !ENTITY::IS_ENTITY_DEAD(playerVehicle, false));
         ENTITY::FREEZE_ENTITY_POSITION(playerVehicle, true);
-        ENTITY::SET_ENTITY_COORDS_NO_OFFSET(playerVehicle, pos.x, pos.y, pos.z + 100.0f, 0, 0, 0);
+        ENTITY::SET_ENTITY_COORDS_NO_OFFSET(playerVehicle, { pos.x, pos.y, pos.z + 100.0f }, 0, 0, 0);
         ENTITY::SET_ENTITY_VISIBLE(playerVehicle, false, false);
     }
 
@@ -452,7 +452,7 @@ void CReplayScript::DeactivatePassengerMode(Vehicle vehicle) {
     currCoords.x -= forward.x * 10.0f;
     currCoords.y -= forward.y * 10.0f;
     float groundZ = currCoords.z;
-    bool groundZOk = MISC::GET_GROUND_Z_FOR_3D_COORD(currCoords.x, currCoords.y, currCoords.z, &groundZ, 0, 0);
+    bool groundZOk = MISC::GET_GROUND_Z_FOR_3D_COORD(currCoords, &groundZ, 0, 0);
     if (!groundZOk) {
         groundZ = currCoords.z;
     }
@@ -460,7 +460,7 @@ void CReplayScript::DeactivatePassengerMode(Vehicle vehicle) {
     if (mPassengerModePlayerVehicle) {
         PED::SET_PED_INTO_VEHICLE(playerPed, mPassengerModePlayerVehicle, -1);
 
-        ENTITY::SET_ENTITY_COORDS(mPassengerModePlayerVehicle, currCoords.x, currCoords.y, groundZ,
+        ENTITY::SET_ENTITY_COORDS(mPassengerModePlayerVehicle, { currCoords.x, currCoords.y, groundZ },
             false, false, false, false);
         ENTITY::SET_ENTITY_ROTATION(mPassengerModePlayerVehicle, currRot.x, currRot.y, currRot.z, 0, false);
 
@@ -480,7 +480,7 @@ void CReplayScript::DeactivatePassengerMode(Vehicle vehicle) {
         mPassengerModePlayerVehicle = 0;
     }
     else {
-        ENTITY::SET_ENTITY_COORDS(playerPed, currCoords.x, currCoords.y, groundZ,
+        ENTITY::SET_ENTITY_COORDS(playerPed, { currCoords.x, currCoords.y, groundZ },
             false, false, false, false);
     }
 
@@ -666,12 +666,12 @@ void CReplayScript::TeleportToTrack(const CTrackData& trackData) {
     ) + 90.0f;
 
     if (playerVehicle) {
-        ENTITY::SET_ENTITY_COORDS(playerVehicle, startOffset.x, startOffset.y, startOffset.z,
+        ENTITY::SET_ENTITY_COORDS(playerVehicle, startOffset,
             false, false, false, false);
         ENTITY::SET_ENTITY_HEADING(playerVehicle, startHeading);
     }
     else {
-        ENTITY::SET_ENTITY_COORDS(playerPed, startOffset.x, startOffset.y, startOffset.z,
+        ENTITY::SET_ENTITY_COORDS(playerPed, startOffset,
             false, false, false, false);
         ENTITY::SET_ENTITY_HEADING(playerPed, startHeading);
     }
@@ -764,11 +764,11 @@ void CReplayScript::updateReplay() {
     for (const auto& replayVehicle : mReplayVehicles) {
         if (!ENTITY::DOES_ENTITY_EXIST(replayVehicle->GetVehicle())) {
             replayVehiclesToDelete.push_back(replayVehicle.get());
-            logger.Write(ERROR, std::format("[Replay] Managed vehicle {} with ID {:08X} stopped existing. "
+            LOG(Error, "[Replay] Managed vehicle {} with ID {:08X} stopped existing. "
                 "Another script likely forcefully removed it. "
                 "Deselected replay to prevent crashes.",
                 Util::GetVehicleName(replayVehicle->GetReplay()->VehicleModel),
-                replayVehicle->GetVehicle()));
+                replayVehicle->GetVehicle());
             continue;
         }
 
@@ -806,7 +806,7 @@ void CReplayScript::updateReplay() {
     if (camIgnoreVehicle) {
         // Only seems to apply for the last passed entity.
         // _DISABLE_CAM_COLLISION_FOR_ENTITY
-        CAM::_DISABLE_CAM_COLLISION_FOR_ENTITY(camIgnoreVehicle);
+        CAM::SET_GAMEPLAY_CAM_IGNORE_ENTITY_COLLISION_THIS_UPDATE(camIgnoreVehicle);
     
         if (mSettings.Main.Debug) {
             Vector3 infoSpherePos = ENTITY::GET_ENTITY_COORDS(camIgnoreVehicle, true);
@@ -1055,9 +1055,8 @@ void CReplayScript::createPtfx(const CTrackData& trackData) {
         WAIT(0);
         if (GetTickCount64() > startTime + 5000) {
             WAIT(0);
-            std::string msg = std::format("Error: Failed to load flare assets.");
-            UI::Notify(msg, false);
-            logger.Write(ERROR, std::format("[Replay] {}", msg));
+            UI::Notify("Error: Failed to load flare assets", false);
+            LOG(Error, "[Replay] Failed to load flare assets");
             return;
         }
     }

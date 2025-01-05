@@ -15,7 +15,7 @@ CTrackData CTrackData::Read(const std::string& trackFile) {
     nlohmann::json trackJson;
     std::ifstream replayFileStream(trackFile.c_str());
     if (!replayFileStream.is_open()) {
-        logger.Write(ERROR, "[Track] Failed to open %s", trackFile.c_str());
+        LOG(Error, "[Track] Failed to open {}", trackFile);
         return trackData;
     }
 
@@ -41,11 +41,11 @@ CTrackData CTrackData::Read(const std::string& trackFile) {
         trackData.FinishLine.B.y = trackJson["FinishLine"]["B"]["Y"];
         trackData.FinishLine.B.z = trackJson["FinishLine"]["B"]["Z"];
 
-        logger.Write(DEBUG, "[Track] Parsed %s", trackFile.c_str());
+        LOG(Debug, "[Track] Parsed {}", trackFile);
         return trackData;
     }
     catch (std::exception& ex) {
-        logger.Write(ERROR, "[Track] Failed to open %s, exception: %s", trackFile.c_str(), ex.what());
+        LOG(Error, "[Track] Failed to open {}, exception: {}", trackFile, ex.what());
         return trackData;
     }
 }
@@ -89,7 +89,7 @@ void CTrackData::Write() {
     std::ofstream trackFile(trackFileName);
     trackFile << std::setw(2) << trackJson << std::endl;
 
-    logger.Write(INFO, "[Track] Written %s", trackFileName.c_str());
+    LOG(Info, "[Track] Written {}", trackFileName);
     mFileName = trackFileName;
 }
 

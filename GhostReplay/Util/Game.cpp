@@ -17,14 +17,14 @@ namespace Util {
 
     SBoxPoints GetBoxPoints(Vector3 pos, Vector3 rot, Vector3 fwd, Vector3 dimMax, Vector3 dimMin) {
         return {
-            GetOffsetInWorldCoords(pos, rot, fwd, {  dimMin.x, 0,  dimMax.y, 0, dimMin.z, 0 }),
-            GetOffsetInWorldCoords(pos, rot, fwd, {  dimMin.x, 0,  dimMax.y, 0, dimMax.z, 0 }),
-            GetOffsetInWorldCoords(pos, rot, fwd, {  dimMax.x, 0,  dimMax.y, 0, dimMin.z, 0 }),
-            GetOffsetInWorldCoords(pos, rot, fwd, {  dimMax.x, 0,  dimMax.y, 0, dimMax.z, 0 }),
-            GetOffsetInWorldCoords(pos, rot, fwd, {  dimMin.x, 0, -dimMax.y, 0, dimMin.z, 0 }),
-            GetOffsetInWorldCoords(pos, rot, fwd, {  dimMin.x, 0, -dimMax.y, 0, dimMax.z, 0 }),
-            GetOffsetInWorldCoords(pos, rot, fwd, {  dimMax.x, 0, -dimMax.y, 0, dimMin.z, 0 }),
-            GetOffsetInWorldCoords(pos, rot, fwd, {  dimMax.x, 0, -dimMax.y, 0, dimMax.z, 0 })
+            GetOffsetInWorldCoords(pos, rot, fwd, {  dimMin.x,  dimMax.y, dimMin.z }),
+            GetOffsetInWorldCoords(pos, rot, fwd, {  dimMin.x,  dimMax.y, dimMax.z }),
+            GetOffsetInWorldCoords(pos, rot, fwd, {  dimMax.x,  dimMax.y, dimMin.z }),
+            GetOffsetInWorldCoords(pos, rot, fwd, {  dimMax.x,  dimMax.y, dimMax.z }),
+            GetOffsetInWorldCoords(pos, rot, fwd, {  dimMin.x, -dimMax.y, dimMin.z }),
+            GetOffsetInWorldCoords(pos, rot, fwd, {  dimMin.x, -dimMax.y, dimMax.z }),
+            GetOffsetInWorldCoords(pos, rot, fwd, {  dimMax.x, -dimMax.y, dimMin.z }),
+            GetOffsetInWorldCoords(pos, rot, fwd, {  dimMax.x, -dimMax.y, dimMax.z })
         };
     }
 
@@ -60,15 +60,15 @@ namespace Util {
         Vector3 rotB = ENTITY::GET_ENTITY_ROTATION(b, 0);
 
         rotA = {
-            deg2rad(rotA.x), 0,
-            deg2rad(rotA.y), 0,
-            deg2rad(rotA.z), 0,
+            deg2rad(rotA.x),
+            deg2rad(rotA.y),
+            deg2rad(rotA.z),
         };
 
         rotB = {
-            deg2rad(rotB.x), 0,
-            deg2rad(rotB.y), 0,
-            deg2rad(rotB.z), 0,
+            deg2rad(rotB.x),
+            deg2rad(rotB.y),
+            deg2rad(rotB.z),
         };
 
         Vector3 dimMinA, dimMaxA;
@@ -121,7 +121,7 @@ namespace Util {
         }
 
         Vehicle vehicle = VEHICLE::CREATE_VEHICLE(model,
-            pos.x, pos.y, pos.z, 0, false, true, false);
+            pos, 0, false, true, false);
         if (vehicleModData)
             VehicleModData::ApplyTo(vehicle, *vehicleModData);
         VEHICLE::SET_VEHICLE_DIRT_LEVEL(vehicle, 0.0f);

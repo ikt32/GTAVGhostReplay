@@ -40,7 +40,7 @@ std::string Util::FormatReplayName(
 
 std::string Util::GetVehicleName(Hash model) {
     const char* name = VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model);
-    std::string displayName = HUD::_GET_LABEL_TEXT(name);
+    std::string displayName = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(name);
     if (displayName == "NULL") {
         displayName = name;
     }
@@ -51,8 +51,8 @@ std::string Util::GetVehicleMake(Hash model) {
     if (getGameVersion() < 54)
         return "";
 
-    const char* name = VEHICLE::_GET_MAKE_NAME_FROM_VEHICLE_MODEL(model);
-    std::string displayName = HUD::_GET_LABEL_TEXT(name);
+    const char* name = VEHICLE::GET_MAKE_NAME_FROM_VEHICLE_MODEL(model);
+    std::string displayName = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(name);
     if (displayName == "NULL") {
         displayName = name;
     }
@@ -78,7 +78,7 @@ std::string Util::GetTimestampReadable(unsigned long long unixTimestampMs) {
 
 Vector3 Util::GroundZ(Vector3 v, float off) {
     float z;
-    if (MISC::GET_GROUND_Z_FOR_3D_COORD(v.x, v.y, v.z, &z, false, false)) {
+    if (MISC::GET_GROUND_Z_FOR_3D_COORD(v, &z, false, false)) {
         v.z = z;
     }
     v.z += off;
@@ -90,8 +90,8 @@ int Util::CreateParticleFxAtCoord(const char* assetName, const char* effectName,
     GRAPHICS::USE_PARTICLE_FX_ASSET(assetName);
     int handle = GRAPHICS::START_PARTICLE_FX_LOOPED_AT_COORD(
         effectName,
-        coord.x, coord.y, coord.z,
-        0.0f, 0.0f, 0.0f,
+        coord,
+        { 0.0f, 0.0f, 0.0f },
         1.0f, false, false, false, false);
     GRAPHICS::SET_PARTICLE_FX_LOOPED_ALPHA(handle, a);
     GRAPHICS::SET_PARTICLE_FX_LOOPED_COLOUR(handle, r, g, b, true);

@@ -1,59 +1,66 @@
 #include "Logger.hpp"
 
-#include <iomanip>
-#include <Windows.h>
+#include <array>
+#include <chrono>
+#include <format>
 #include <fstream>
+#include <vector>
 
-Logger::Logger() = default;
+CLogger gLogger;
 
-void Logger::SetFile(const std::string & fileName) {
-    file = fileName;
+namespace {
+constexpr std::array<const char*, 5> sLevelNames{
+    " DEBUG ",
+    " INFO  ",
+    "WARNING",
+    " ERROR ",
+    " FATAL "
+};
+
+constexpr const char* GetLevelText(ELogLevel level) {
+    if (level < 0 || level >= sLevelNames.size())
+        return "UNKNOWN";
+    return sLevelNames[level];
+}
 }
 
-void Logger::SetMinLevel(LogLevel level) {
-    minLevel = level;
+void CLogger::SetPath(const std::filesystem::path& logFilePath) {
+    mLogFilePath = logFilePath;
 }
 
-void Logger::Clear() const {
-    std::lock_guard lock(mutex);
-    std::ofstream logFile(file, std::ofstream::out | std::ofstream::trunc);
+void CLogger::SetLogLevel(ELogLevel level) {
+    mLogLevel = level;
 }
 
-void Logger::Write(LogLevel level, const std::string & text) const {
-#ifndef _DEBUG
-    if (level < minLevel) return;
-#endif
-    std::lock_guard lock(mutex);
-    std::ofstream logFile(file, std::ios_base::out | std::ios_base::app);
-    SYSTEMTIME currTimeLog;
-    GetLocalTime(&currTimeLog);
-    logFile << "[" <<
-        std::setw(2) << std::setfill('0') << currTimeLog.wHour << ":" <<
-        std::setw(2) << std::setfill('0') << currTimeLog.wMinute << ":" <<
-        std::setw(2) << std::setfill('0') << currTimeLog.wSecond << "." <<
-        std::setw(3) << std::setfill('0') << currTimeLog.wMilliseconds << "] " <<
-        "[" << levelText(level) << "] " <<
-        text << "\n";
-
-    if (logFile.bad())
+void CLogger::Clear() {
+    std::lock_guard lock(mMutex);
+    std::ofstream logFile(mLogFilePath, std::ofstream::out | std::ofstream::trunc);
+    logFile.close();
+    if (logFile.fail())
         mError = true;
 }
 
-void Logger::Write(LogLevel level, const char* fmt, ...) const {
-    const int size = 1024;
-    char buff[size];
-    va_list args;
-    va_start(args, fmt);
-    vsnprintf(buff, size, fmt, args);
-    va_end(args);
-    Write(level, std::string(buff));
+bool CLogger::IsInError() const {
+    return mError;
 }
 
-bool Logger::Error() { return mError; }
-
-std::string Logger::levelText(LogLevel level) const {
-    return levelStrings[level];
+void CLogger::ClearError() {
+    mError = false;
 }
 
-// Everything's gonna use this instance.
-Logger logger;
+void CLogger::WriteImpl(ELogLevel level, const std::string& txt) {
+    if (level < mLogLevel) return;
+
+    std::lock_guard lock(mMutex);
+    std::ofstream logFile(mLogFilePath, std::ios_base::out | std::ios_base::app);
+
+    const auto now = std::chrono::floor<std::chrono::milliseconds>(std::chrono::system_clock::now());
+    logFile << std::format("[{:%Y-%m-%dT%H:%M:%SZ}] [{}] {}\n",
+                           now,
+                           GetLevelText(level),
+                           txt);
+
+    logFile.close();
+    if (logFile.fail())
+        mError = true;
+}

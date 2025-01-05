@@ -83,7 +83,7 @@
       <AdditionalDependencies>$(SolutionDir)thirdparty\ScriptHookV_SDK\lib\ScriptHookV.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>PostBuild.bat $(ProjectDir)$(OutDir) "D:\Games\Steam\steamapps\common\Grand Theft Auto V" $(TargetFileName)</Command>
+      <Command>PostBuild.bat $(ProjectDir)$(OutDir) "E:\Games\Steam\steamapps\common\Grand Theft Auto V" $(TargetFileName)</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>Prebuild.bat $(ProjectDir)</Command>
@@ -148,6 +148,11 @@
     <ClInclude Include="..\thirdparty\minhook\src\trampoline.h" />
     <ClInclude Include="..\thirdparty\pugixml\src\pugiconfig.hpp" />
     <ClInclude Include="..\thirdparty\pugixml\src\pugixml.hpp" />
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\enums.h" />
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\main.h" />
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\nativeCaller.h" />
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\natives.h" />
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\types.h" />
     <ClInclude Include="Blip.hpp" />
     <ClInclude Include="Compatibility.hpp" />
     <ClInclude Include="Image.hpp" />

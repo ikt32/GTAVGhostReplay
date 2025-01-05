@@ -88,6 +88,7 @@
       <Filter>Util</Filter>
     </ClCompile>
     <ClCompile Include="ReplayDriver.cpp" />
+    <ClCompile Include="Impacts.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Util">
@@ -122,6 +123,9 @@
     </Filter>
     <Filter Include="Serializables">
       <UniqueIdentifier>{86d31452-7b39-4e09-90bc-37293cb35417}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty\ScriptHookV">
+      <UniqueIdentifier>{8c1aeb97-432a-41f2-a9b9-9b7c5255c22a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -251,6 +255,22 @@
     </ClInclude>
     <ClInclude Include="Serializables\HairColor.hpp">
       <Filter>Serializables</Filter>
+    </ClInclude>
+    <ClInclude Include="Impacts.hpp" />
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\enums.h">
+      <Filter>ThirdParty\ScriptHookV</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\main.h">
+      <Filter>ThirdParty\ScriptHookV</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\nativeCaller.h">
+      <Filter>ThirdParty\ScriptHookV</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\natives.h">
+      <Filter>ThirdParty\ScriptHookV</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\types.h">
+      <Filter>ThirdParty\ScriptHookV</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

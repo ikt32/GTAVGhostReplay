@@ -52,13 +52,19 @@ ExtensionList_get_t g_extensionList_get = nullptr;
 
 void Driver::SetupHeadBlendDataFunctions() {
     auto addr1 = mem::FindPattern("48 39 5E 38 74 1B 8B 15 ? ? ? ? 48 8D 4F 10 E8");
-    logger.Write(addr1 ? DEBUG : ERROR, "[Driver] addr1: 0x%llX", addr1);
+    if (addr1)
+        LOG(Debug, "[Driver] addr1: 0x{:X}", addr1);
+    else
+        LOG(Error, "[Driver] addr1: 0x{:X}", addr1);
 
     auto addr2 = mem::FindPattern("41 83 E0 1F 8B 44 81 08 44 0F A3 C0");
-    logger.Write(addr2 ? DEBUG : ERROR, "[Driver] addr2: 0x%llX", addr2);
+    if (addr2)
+        LOG(Debug, "[Driver] addr1: 0x{:X}", addr2);
+    else
+        LOG(Error, "[Driver] addr1: 0x{:X}", addr2);
 
     if (!addr1 || !addr2) {
-        logger.Write(ERROR, "[Driver] Unable to retrieve head blend data");
+        LOG(Error, "[Driver] Unable to retrieve head blend data");
         return;
     }
 
@@ -101,14 +107,14 @@ SReplayDriverData SReplayDriverData::LoadFrom(Ped ped) {
     for (int componentId : { 0, 1, 2, 6, 7 }) {
         SPedProp prop{
             .ComponentId = componentId,
-            .Index = PED::GET_PED_PROP_INDEX(ped, componentId),
+            .Index = PED::GET_PED_PROP_INDEX(ped, componentId, 0),
             .TextureIndex = PED::GET_PED_PROP_TEXTURE_INDEX(ped, componentId),
         };
         driverData.Props.push_back(prop);
     }
 
     SHeadBlendData headBlendData;
-    bool hasHeadBlendData = PED::GET_PED_HEAD_BLEND_DATA(ped, &headBlendData);
+    bool hasHeadBlendData = PED::GET_PED_HEAD_BLEND_DATA(ped, reinterpret_cast<Any*>(&headBlendData));
     if (hasHeadBlendData) {
         driverData.HeadBlendData = headBlendData;
     }
@@ -131,7 +137,7 @@ SReplayDriverData SReplayDriverData::LoadFrom(Ped ped) {
             .HighlightColorId = pHeadBlendDataAdv->hairHighlight,
         };
 
-        driverData.EyeColor = PED::_GET_PED_EYE_COLOR(ped);
+        driverData.EyeColor = PED::GET_HEAD_BLEND_EYE_COLOR(ped);
     }
 
     return driverData;
@@ -145,7 +151,7 @@ void SReplayDriverData::ApplyTo(Ped ped, SReplayDriverData driverData) {
     }
 
     for (const auto& prop : driverData.Props) {
-        PED::SET_PED_PROP_INDEX(ped, prop.ComponentId, prop.Index, prop.TextureIndex, 2);
+        PED::SET_PED_PROP_INDEX(ped, prop.ComponentId, prop.Index, prop.TextureIndex, 2, 1);
     }
 
     if (driverData.HeadBlendData != std::nullopt) {
@@ -162,17 +168,17 @@ void SReplayDriverData::ApplyTo(Ped ped, SReplayDriverData driverData) {
             SHeadOverlayData hod = driverData.HeadOverlays.value()[i];
             PED::SET_PED_HEAD_OVERLAY(ped, i,
                 hod.Value, hod.Alpha);
-            PED::_SET_PED_HEAD_OVERLAY_COLOR(ped, i,
+            PED::SET_PED_HEAD_OVERLAY_TINT(ped, i,
                 hod.ColorType, hod.ColorId, hod.HighlightId);
         }
     }
 
     if (driverData.HairColor != std::nullopt) {
-        PED::_SET_PED_HAIR_COLOR(ped, driverData.HairColor->ColorId,
+        PED::SET_PED_HAIR_TINT(ped, driverData.HairColor->ColorId,
             driverData.HairColor->HighlightColorId);
     }
 
     if (driverData.EyeColor != std::nullopt) {
-        PED::_SET_PED_EYE_COLOR(ped, driverData.EyeColor.value());
+        PED::SET_HEAD_BLEND_EYE_COLOR(ped, driverData.EyeColor.value());
     }
 }

@@ -51,6 +51,8 @@ bool Impacts::Found() {
 }
 
 void Impacts::Setup() {
+    // Latest confirmed working game build for this:
+    // 2845
     fnAddr = reinterpret_cast<void*>(mem::FindPattern(
         "48 8B C4 48 89 58 08 48 89 68 10 "
         "48 89 70 18 48 89 78 20 41 56 "
@@ -58,7 +60,7 @@ void Impacts::Setup() {
 
     if (!fnAddr) {
         // TODO: Update actual pattern
-        logger.Write(INFO, "Couldn't find pre-b2944 ShouldFindImpacts");
+        LOG(Info, "Couldn't find pre-b2944 ShouldFindImpacts");
         fnAddr = reinterpret_cast<void*>(mem::FindPattern(
             "48 8B C4 48 89 58 08 48 89 68 10 "
             "48 89 70 18 48 89 78 20 41 56 "
@@ -66,26 +68,26 @@ void Impacts::Setup() {
     }
 
     if (!fnAddr) {
-        logger.Write(ERROR, "Couldn't find ShouldFindImpacts definitively");
+        LOG(Error, "Couldn't find ShouldFindImpacts definitively");
         return;
     }
-    logger.Write(DEBUG, "Found ShouldFindImpacts at 0x%p", fnAddr);
+    LOG(Debug, "Found ShouldFindImpacts at 0x{:X}", fnAddr);
 
     auto result = MH_Initialize();
     if (result != MH_OK) {
-        logger.Write(ERROR, "MH_Initialize failed: %d", result);
+        LOG(Error, "MH_Initialize failed: {}", static_cast<int>(result));
         return;
     }
 
     result = MH_CreateHook(fnAddr, &ShouldFindImpactsHook, reinterpret_cast<LPVOID*>(&ShouldFindImpactsOriginal));
     if (result != MH_OK) {
-        logger.Write(ERROR, "MH_CreateHook failed: %d", result);
+        LOG(Error, "MH_CreateHook failed: {}", static_cast<int>(result));
         return;
     }
 
     result = MH_EnableHook(MH_ALL_HOOKS);
     if (result != MH_OK) {
-        logger.Write(ERROR, "MH_EnableHook failed: %d", result);
+        LOG(Error, "MH_EnableHook failed: {}", static_cast<int>(result));
         return;
     }
 }

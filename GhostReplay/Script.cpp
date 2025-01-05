@@ -78,7 +78,7 @@ void GhostReplay::ScriptMain() {
 
     settings = std::make_shared<CScriptSettings>(settingsGeneralPath);
     settings->Load();
-    logger.Write(INFO, "Settings loaded");
+    LOG(Info, "Settings loaded");
 
     GhostReplay::CreateDirectories();
     GhostReplay::LoadReplays();
@@ -155,16 +155,16 @@ void GhostReplay::CreateDirectories() {
         "\\Tracks";
 
     if (!(fs::exists(fs::path(replaysPath)) && fs::is_directory(fs::path(replaysPath)))) {
-        logger.Write(INFO, "[Replay] Creating missing directory [%s]", replaysPath.c_str());
+        LOG(Info, "[Replay] Creating missing directory [{}]", replaysPath);
         if (!std::filesystem::create_directory(fs::path(replaysPath))) {
-            logger.Write(ERROR, "[Replay] Failed to create directory, replays will not be saved!");
+            LOG(Error, "[Replay] Failed to create directory, replays will not be saved!");
         }
     }
 
     if (!(fs::exists(fs::path(tracksPath)) && fs::is_directory(fs::path(tracksPath)))) {
-        logger.Write(INFO, "[Track] Creating missing directory [%s]", tracksPath.c_str());
+        LOG(Info, "[Track] Creating missing directory [{}]", tracksPath);
         if (!std::filesystem::create_directory(fs::path(tracksPath))) {
-            logger.Write(ERROR, "[Track] Failed to create directory, tracks will not be saved!");
+            LOG(Error, "[Track] Failed to create directory, tracks will not be saved!");
         }
     }
 }
@@ -175,10 +175,10 @@ void GhostReplay::LoadReplays() {
         Constants::ModDir +
         "\\Replays";
 
-    logger.Write(DEBUG, "[Replay] Clearing and reloading replays");
+    LOG(Debug, "[Replay] Clearing and reloading replays");
     
     if (!(fs::exists(fs::path(replaysPath)) && fs::is_directory(fs::path(replaysPath)))) {
-        logger.Write(ERROR, "[Replay] Directory [%s] not found!", replaysPath.c_str());
+        LOG(Error, "[Replay] Directory [{}] not found!", replaysPath);
         return;
     }
     
@@ -217,14 +217,14 @@ void GhostReplay::LoadReplays() {
                 replays.push_back(std::make_shared<CReplayData>(replay));
             }
             else {
-                logger.Write(WARN, "[Replay] Skipping [%s] - not a valid file", file.c_str());
+                LOG(Warning, "[Replay] Skipping [{}] - not a valid file", file);
             }
 
-            logger.Write(DEBUG, "[Replay] Loaded replay [%s]", replay.Name.c_str());
+            LOG(Debug, "[Replay] Loaded replay [{}]", replay.Name);
             ++loadedReplays;
         }
 
-        logger.Write(INFO, "[Replay] Replays loaded: %d", replays.size());
+        LOG(Info, "[Replay] Replays loaded: {}", replays.size());
         pendingReplays.clear();
 
         std::lock_guard nameMutex(currentLoadingReplayMutex);
@@ -238,12 +238,12 @@ uint32_t GhostReplay::LoadTracks() {
         Constants::ModDir +
         "\\Tracks";
 
-    logger.Write(DEBUG, "[Track] Clearing and reloading tracks");
+    LOG(Debug, "[Track] Clearing and reloading tracks");
 
     tracks.clear();
 
     if (!(fs::exists(fs::path(tracksPath)) && fs::is_directory(fs::path(tracksPath)))) {
-        logger.Write(ERROR, "[Track] Directory [%s] not found!", tracksPath.c_str());
+        LOG(Error, "[Track] Directory [{}] not found!", tracksPath);
         return 0;
     }
 
@@ -256,11 +256,11 @@ uint32_t GhostReplay::LoadTracks() {
         if (!track.Name.empty())
             tracks.push_back(track);
         else
-            logger.Write(WARN, "[Track] Skipping [%s] - not a valid file", fs::path(file).string().c_str());
+            LOG(Warning, "[Track] Skipping [{}] - not a valid file", fs::path(file).string());
 
-        logger.Write(DEBUG, "[Track] Loaded track [%s]", track.Name.c_str());
+        LOG(Debug, "[Track] Loaded track [{}]", track.Name);
     }
-    logger.Write(INFO, "[Track] Tracks loaded: %d", tracks.size());
+    LOG(Info, "[Track] Tracks loaded: {}", tracks.size());
 
     return static_cast<unsigned>(tracks.size());
 }
@@ -271,12 +271,12 @@ uint32_t GhostReplay::LoadTrackImages() {
         Constants::ModDir +
         "\\Tracks";
 
-    logger.Write(DEBUG, "[TrackImg] Clearing and reloading track images");
+    LOG(Debug, "[TrackImg] Clearing and reloading track images");
 
     trackImages.clear();
 
     if (!(fs::exists(fs::path(tracksPath)) && fs::is_directory(fs::path(tracksPath)))) {
-        logger.Write(ERROR, "[TrackImg] Directory [%s] not found!", tracksPath.c_str());
+        LOG(Error, "[TrackImg] Directory [{}] not found!", tracksPath);
         return 0;
     }
 
@@ -297,16 +297,16 @@ uint32_t GhostReplay::LoadTrackImages() {
             height = dims->second;
         }
         else {
-            logger.Write(WARN, "[TrackImg] Skipping [%s]: not an valid image.", fs::path(file).string().c_str());
+            LOG(Warning, "[TrackImg] Skipping [{}]: not an valid image.", fs::path(file).string());
             continue;
         }
 
         int handle = createTexture(fileName.c_str());
         trackImages.emplace_back(handle, stem, width, height);
 
-        logger.Write(DEBUG, "[TrackImg] Loaded track image [%s]", stem.c_str());
+        LOG(Debug, "[TrackImg] Loaded track image [{}]", stem);
     }
-    logger.Write(INFO, "[TrackImg] Track images loaded: %d", trackImages.size());
+    LOG(Info, "[TrackImg] Track images loaded: {}", trackImages.size());
 
     return static_cast<unsigned>(trackImages.size());
 }
@@ -315,12 +315,12 @@ uint32_t GhostReplay::LoadARSTracks() {
     const std::string tracksPath =
         Paths::GetRunningExecutableFolder() + "\\Scripts\\ARS\\Tracks";
 
-    logger.Write(DEBUG, "[Track-ARS] Clearing and reloading tracks");
+    LOG(Debug, "[Track-ARS] Clearing and reloading tracks");
 
     arsTracks.clear();
 
     if (!(fs::exists(fs::path(tracksPath)) && fs::is_directory(fs::path(tracksPath)))) {
-        logger.Write(ERROR, "[Track-ARS] Directory [%s] not found!", tracksPath.c_str());
+        LOG(Error, "[Track-ARS] Directory [{}] not found!", tracksPath);
         return 0;
     }
 
@@ -332,13 +332,13 @@ uint32_t GhostReplay::LoadARSTracks() {
         CTrackData track = CTrackData::ReadARS(fs::path(file).string());
         if (!track.Name.empty()) {
             arsTracks.push_back(track);
-            logger.Write(DEBUG, "[Track-ARS] Loaded track [%s]", track.Name.c_str());
+            LOG(Debug, "[Track-ARS] Loaded track [{}]", track.Name);
         }
         else {
-            logger.Write(WARN, "[Track-ARS] Skipping [%s] - not a valid file", fs::path(file).string().c_str());
+            LOG(Warning, "[Track-ARS] Skipping [{}] - not a valid file", fs::path(file).string());
         }
     }
-    logger.Write(INFO, "[Track-ARS] Tracks loaded: %d", arsTracks.size());
+    LOG(Info, "[Track-ARS] Tracks loaded: {}", arsTracks.size());
 
     return static_cast<unsigned>(arsTracks.size());
 }

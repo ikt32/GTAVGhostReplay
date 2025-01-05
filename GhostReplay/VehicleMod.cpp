@@ -94,10 +94,10 @@ VehicleMod VehicleMod::Get(Vehicle vehicle) {
                 Value0 = VEHICLE::IS_VEHICLE_EXTRA_TURNED_ON(vehicle, ModId);
             break;
         case ModType::Neon:
-            Value0 = VEHICLE::_IS_VEHICLE_NEON_LIGHT_ENABLED(vehicle, ModId);
+            Value0 = VEHICLE::GET_VEHICLE_NEON_ENABLED(vehicle, ModId);
             break;
         case ModType::NeonColor:
-            VEHICLE::_GET_VEHICLE_NEON_LIGHTS_COLOUR(vehicle, &Value0, &Value1, &Value2);
+            VEHICLE::GET_VEHICLE_NEON_COLOUR(vehicle, &Value0, &Value1, &Value2);
             break;
         case ModType::XenonColor:
             Value0 = VEHICLE::_GET_VEHICLE_XENON_LIGHTS_COLOUR(vehicle);
@@ -166,10 +166,10 @@ void VehicleMod::Set(Vehicle vehicle) {
                 VEHICLE::SET_VEHICLE_EXTRA(vehicle, ModId, !Value0);
             break;
         case ModType::Neon:
-            VEHICLE::_SET_VEHICLE_NEON_LIGHT_ENABLED(vehicle, ModId, Value0);
+            VEHICLE::SET_VEHICLE_NEON_ENABLED(vehicle, ModId, Value0);
             break;
         case ModType::NeonColor:
-            VEHICLE::_SET_VEHICLE_NEON_LIGHTS_COLOUR(vehicle, Value0, Value1, Value2);
+            VEHICLE::SET_VEHICLE_NEON_COLOUR(vehicle, Value0, Value1, Value2);
             break;
         case ModType::XenonColor:
             VEHICLE::_SET_VEHICLE_XENON_LIGHTS_COLOUR(vehicle, Value0);

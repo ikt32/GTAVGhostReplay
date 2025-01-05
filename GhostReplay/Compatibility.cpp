@@ -32,10 +32,10 @@ template <typename T>
 T CheckAddr(HMODULE lib, const std::string& funcName) {
     FARPROC func = GetProcAddress(lib, funcName.c_str());
     if (!func) {
-        logger.Write(ERROR, "[Compat] Couldn't get function [%s]", funcName.c_str());
+        LOG(Error, "[Compat] Couldn't get function [{}]", funcName);
         return nullptr;
     }
-    logger.Write(DEBUG, "[Compat] Found function [%s]", funcName.c_str());
+    LOG(Debug, "[Compat] Found function [{}]", funcName);
     return reinterpret_cast<T>(func);
 }
 
@@ -48,10 +48,10 @@ void Compatibility::Release() {
 }
 
 void RagePresence::Setup() {
-    logger.Write(INFO, "[Compat] Setting up RagePresence (Lemon)");
+    LOG(Info, "[Compat] Setting up RagePresence (Lemon)");
     Module = GetModuleHandle(L"RagePresence.asi");
     if (!Module) {
-        logger.Write(INFO, "[Compat] No RagePresence");
+        LOG(Info, "[Compat] No RagePresence");
         return;
     }
 

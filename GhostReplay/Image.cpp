@@ -33,7 +33,7 @@ std::optional<std::pair<uint32_t, uint32_t>> Img::GetPNGDimensions(const std::st
     std::ifstream img(path, std::ios::binary);
 
     if (!img.good()) {
-        logger.Write(ERROR, "[IMG]: %s failed to open", path.c_str());
+        LOG(Error, "[IMG]: {} failed to open", path);
         return {};
     }
 
@@ -57,7 +57,7 @@ std::optional<std::pair<uint32_t, uint32_t>> Img::GetPNGDimensions(const std::st
         return { {w, h} };
     }
 
-    logger.Write(ERROR, "[IMG]: %s not a PNG file, sig: 0x%16X", path.c_str(), imgSig);
+    LOG(Error, "[IMG]: {} not a PNG file, sig: 0x{:16X}", path, imgSig);
     return {};
 }
 
@@ -66,7 +66,7 @@ std::optional<std::pair<uint32_t, uint32_t>> Img::GetJPGDimensions(const std::st
 
     errno_t err = fopen_s(&image, path.c_str(), "rb");  // open JPEG image file
     if (!image || err) {
-        logger.Write(ERROR, "[IMG]: %s: Failed to open file", fs::path(path).filename().string().c_str());
+        LOG(Error, "[IMG]: {}: Failed to open file", fs::path(path).filename().string());
         if (image)
             fclose(image);
         return {};
@@ -90,7 +90,7 @@ std::optional<std::pair<uint32_t, uint32_t>> Img::GetWebPDimensions(const std::s
     std::ifstream img(path, std::ios::binary);
 
     if (!img.good()) {
-        logger.Write(ERROR, "[IMG]: %s failed to open", path.c_str());
+        LOG(Error, "[IMG]: {} failed to open", path);
         return {};
     }
 
@@ -118,8 +118,8 @@ std::optional<std::pair<uint32_t, uint32_t>> Img::GetWebPDimensions(const std::s
             img.seekg(0x17);
             img.read((char*)sigBytes, 3);
             if (sigBytes[0] != 0x9D || sigBytes[1] != 0x01 || sigBytes[2] != 0x2A) {
-                logger.Write(ERROR, "[IMG]: %s failed to find VP8 (Lossy) signature bytes, got 0x%02X 0x%02X 0x%02X",
-                    path.c_str(), sigBytes[0], sigBytes[1], sigBytes[2]);
+                LOG(Error, "[IMG]: {} failed to find VP8 (Lossy) signature bytes, got 0x{:02X} 0x{:02X} 0x{:02X}",
+                    path, sigBytes[0], sigBytes[1], sigBytes[2]);
                 return {};
             }
 
@@ -136,8 +136,8 @@ std::optional<std::pair<uint32_t, uint32_t>> Img::GetWebPDimensions(const std::s
             img.seekg(5 * sizeof(uint32_t));
             img.read((char*)&sigByte, 1);
             if (sigByte != 0x2F) {
-                logger.Write(ERROR, "[IMG]: %s failed to find VP8 (Lossless) signature byte, got 0x%02X",
-                    path.c_str(), sigByte);
+                LOG(Error, "[IMG]: {} failed to find VP8 (Lossless) signature byte, got 0x{:02X}",
+                    path, sigByte);
                 return {};
             }
 
@@ -151,14 +151,14 @@ std::optional<std::pair<uint32_t, uint32_t>> Img::GetWebPDimensions(const std::s
             return { {w + 1, h + 1} };
         }
         default:
-            logger.Write(ERROR, "[IMG]: %s unrecognized WebP format. FourCC: 0x%04X",
-                path.c_str(), vp8Sig);
+            LOG(Error, "[IMG]: {} unrecognized WebP format. FourCC: 0x{:04X}",
+                path, vp8Sig);
             return {};
         }
     }
     else {
-        logger.Write(ERROR, "[IMG]: %s not a WebP file. RIFF (0x%04X): 0x%04X, WEBP (0x%04X): 0x%04X",
-            path.c_str(), riffSig, imgRiffSig, webpSig, imgWebPSig);
+        LOG(Error, "[IMG]: {} not a WebP file. RIFF (0x{:04X}): 0x{:04X}, WEBP (0x{:04X}): 0x{:04X}",
+            path, riffSig, imgRiffSig, webpSig, imgWebPSig);
         return {};
     }
 }

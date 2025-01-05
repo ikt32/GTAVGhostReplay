@@ -67,7 +67,7 @@ bool CReplayVehicle::UpdatePlayback(double replayTime, bool startPassedThisTick,
         }
         case EReplayState::Paused: {
             if (mActiveReplay && mLastNode == mActiveReplay->Nodes.end()) {
-                logger.Write(DEBUG, "Updating currentNode to activeReplay begin");
+                LOG(Debug, "Updating currentNode to activeReplay begin");
                 mLastNode = mActiveReplay->Nodes.begin();
                 startReplay();
                 startedReplayThisTick = true;
@@ -251,9 +251,9 @@ void CReplayVehicle::showNode(
 
     if (mSettings.Main.Debug) {
         Vector3 rotRad = {
-            deg2rad(rot.x), 0,
-            deg2rad(rot.y), 0,
-            deg2rad(rot.z), 0,
+            deg2rad(rot.x),
+            deg2rad(rot.y),
+            deg2rad(rot.z),
         };
         Util::DrawModelExtents(ENTITY::GET_ENTITY_MODEL(GetVehicle()), pos, rotRad, 255, 255, 255);
     }
@@ -288,7 +288,7 @@ void CReplayVehicle::showNode(
     if (nodeCurr == mActiveReplay->Nodes.begin() || paused ||
         mSettings.Replay.SyncType == ESyncType::Distance && dist > mSettings.Replay.SyncDistance ||
         mSettings.Replay.SyncType == ESyncType::Constant) {
-        ENTITY::SET_ENTITY_COORDS_NO_OFFSET(mReplayVehicle, pos.x, pos.y, pos.z, false, false, false);
+        ENTITY::SET_ENTITY_COORDS_NO_OFFSET(mReplayVehicle, pos, false, false, false);
     }
     ENTITY::SET_ENTITY_ROTATION(mReplayVehicle, rot.x, rot.y, rot.z, 0, false);
 
@@ -301,7 +301,7 @@ void CReplayVehicle::showNode(
             vel = vel + dVel;
         }
 
-        ENTITY::SET_ENTITY_VELOCITY(mReplayVehicle, vel.x, vel.y, vel.z);
+        ENTITY::SET_ENTITY_VELOCITY(mReplayVehicle, vel);
     }
 
     // Base wheel rotation (for dashboard speed) on forward speed,
@@ -434,13 +434,13 @@ void CReplayVehicle::createReplayVehicle(Hash model, CReplayData* activeReplay, 
         std::string msg =
             std::format("Error: Couldn't find model 0x{:08X}. Falling back to ({}).", model, fallbackModelName);
         UI::Notify(msg, false);
-        logger.Write(ERROR, std::format("[Replay] {}", msg));
+        LOG(Error, "[Replay] {}", msg);
 
         model = MISC::GET_HASH_KEY(fallbackModelName);
         if (!(STREAMING::IS_MODEL_IN_CDIMAGE(model) && STREAMING::IS_MODEL_A_VEHICLE(model))) {
             msg = "Error: Failed to find fallback model.";
             UI::Notify(msg, false);
-            logger.Write(ERROR, std::format("[Replay] {}", msg));
+            LOG(Error, "[Replay] {}", msg);
             return;
         }
     }
@@ -465,7 +465,7 @@ void CReplayVehicle::createReplayVehicle(Hash model, CReplayData* activeReplay, 
     ENTITY::SET_ENTITY_CAN_BE_DAMAGED(mReplayVehicle, false);
     VEHICLE::SET_VEHICLE_CAN_BE_VISIBLY_DAMAGED(mReplayVehicle, false);
     VEHICLE::SET_VEHICLE_HAS_UNBREAKABLE_LIGHTS(mReplayVehicle, false);
-    VEHICLE::_SET_DISABLE_VEHICLE_WINDOW_COLLISIONS(mReplayVehicle, true);
+    VEHICLE::SET_DONT_PROCESS_VEHICLE_GLASS(mReplayVehicle, true);
 }
 
 void CReplayVehicle::createReplayPed() {
@@ -473,7 +473,7 @@ void CReplayVehicle::createReplayPed() {
         mSettings.Replay.DriverModels.empty()) {
         std::string msg = "Error: No ped models available, skipping ped creation.";
         UI::Notify(msg, false);
-        logger.Write(ERROR, std::format("[Replay] {}", msg));
+        LOG(Error, "[Replay] {}", msg);
         mReplayPed = 0;
         return;
     }
@@ -510,7 +510,7 @@ void CReplayVehicle::createReplayPed() {
             std::format("Error: Couldn't find ped model 0x{:08X} or 0x{:08X}. Skipping ped creation.",
                 mActiveReplay->ReplayDriver.Model, randomModel);
         UI::Notify(msg, false);
-        logger.Write(ERROR, std::format("[Replay] {}", msg));
+        LOG(Error, "[Replay] {}", msg);
         mReplayPed = 0;
         return;
     }
@@ -525,7 +525,7 @@ void CReplayVehicle::createReplayPed() {
             STREAMING::SET_MODEL_AS_NO_LONGER_NEEDED(model);
             std::string msg = std::format("Error: Failed to load ped model 0x{:08X}.", model);
             UI::Notify(msg, false);
-            logger.Write(ERROR, std::format("[Replay] {}", msg));
+            LOG(Error, "[Replay] {}", msg);
             return;
         }
     }
@@ -587,7 +587,7 @@ void CReplayVehicle::hideVehicle() {
 
     // Freeze invisible vehicle in air, so it won't get damaged (falling in water, etc).
     ENTITY::FREEZE_ENTITY_POSITION(mReplayVehicle, true);
-    ENTITY::SET_ENTITY_COORDS_NO_OFFSET(mReplayVehicle, pos.x, pos.y, pos.z + 100.0f, false, false, false);
+    ENTITY::SET_ENTITY_COORDS_NO_OFFSET(mReplayVehicle, { pos.x, pos.y, pos.z + 100.0f }, false, false, false);
 
     VExt::SetCurrentRPM(mReplayVehicle, 0.0f);
 

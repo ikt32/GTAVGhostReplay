@@ -28,22 +28,22 @@ BOOL APIENTRY DllMain(HMODULE hInstance, DWORD reason, LPVOID lpReserved) {
         fs::create_directory(modPath);
     }
 
-    logger.SetFile(logFile);
-    logger.SetMinLevel(DEBUG);
+    gLogger.SetPath(logFile);
+    gLogger.SetLogLevel(Debug);
     Paths::SetOurModuleHandle(hInstance);
 
     switch (reason) {
         case DLL_PROCESS_ATTACH: {
             Dll::unloading = false;
-            logger.Clear();
+            gLogger.Clear();
             int gameVersion = getGameVersion();
-            logger.Write(INFO, "GhostReplay %s (built %s %s) (%s)",
+            LOG(Info, "GhostReplay {} (built {} {}) ({})",
                 Constants::DisplayVersion, __DATE__, __TIME__, GIT_HASH GIT_DIFF);
-            logger.Write(INFO, "Game version: %s (%d)", eGameVersionToString(gameVersion).c_str(), gameVersion);
+            LOG(Info, "Game version: {} ({})", eGameVersionToString(gameVersion), gameVersion);
 
             scriptRegister(hInstance, GhostReplay::ScriptMain);
 
-            logger.Write(INFO, "Script registered");
+            LOG(Info, "Script registered");
             Dll::SetupHooks();
             break;
         }

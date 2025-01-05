@@ -9,8 +9,8 @@
 
 #define CHECK_LOG_SI_ERROR(result, operation) \
     if ((result) < 0) { \
-        logger.Write(ERROR, "[Config] %s Failed to %s, SI_Error [%d]", \
-        __FUNCTION__, operation, result); \
+        LOG(Error, "[Config] {} Failed to {}, SI_Error [{}]", \
+        __FUNCTION__, operation, static_cast<int>(result)); \
     }
 
 #define SAVE_VAL(section, key, option) \
@@ -78,22 +78,22 @@ void CScriptSettings::Load() {
 
     // Correct invalid settings
     if (Main.ReplaySortBy < 0 || Main.ReplaySortBy > 2) {
-        logger.Write(WARN, "[Settings] Main.ReplaySortBy: Invalid value '%d', using 0", Main.ReplaySortBy);
+        LOG(Warning, "[Settings] Main.ReplaySortBy: Invalid value '{}', using 0", Main.ReplaySortBy);
         Main.ReplaySortBy = 0;
     }
 
     if (Replay.ForceLights < 0 || Replay.ForceLights > 2) {
-        logger.Write(WARN, "[Settings] Replay.ForceLights: Invalid value '%d', using 0", Replay.ForceLights);
+        LOG(Warning, "[Settings] Replay.ForceLights: Invalid value '{}', using 0", Replay.ForceLights);
         Replay.ForceLights = 0;
     }
 
     if (Replay.ForceRoof < 0 || Replay.ForceRoof > 2) {
-        logger.Write(WARN, "[Settings] Replay.ForceRoof: Invalid value '%d', using 0", Replay.ForceRoof);
+        LOG(Warning, "[Settings] Replay.ForceRoof: Invalid value '{}', using 0", Replay.ForceRoof);
         Replay.ForceRoof = 0;
     }
 
     if (syncType < 0 || syncType > ESyncTypeMax) {
-        logger.Write(WARN, "[Settings] Replay.SyncType: Invalid value '%d', using 0", syncType);
+        LOG(Warning, "[Settings] Replay.SyncType: Invalid value '{}', using 0", syncType);
         syncType = 0;
     }
     Replay.SyncType = static_cast<ESyncType>(syncType);

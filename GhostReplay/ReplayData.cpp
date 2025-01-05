@@ -32,7 +32,7 @@ CReplayData CReplayData::Read(const std::string& replayFile) {
     nlohmann::ordered_json replayJson;
     std::ifstream replayFileStream(replayFile.c_str());
     if (!replayFileStream.is_open()) {
-        logger.Write(ERROR, "[Replay] Failed to open %s", replayFile.c_str());
+        LOG(Error, "[Replay] Failed to open {}", replayFile);
         return replayData;
     }
 
@@ -89,11 +89,11 @@ CReplayData CReplayData::Read(const std::string& replayFile) {
 
             replayData.Nodes.push_back(node);
         }
-        logger.Write(DEBUG, "[Replay] Parsed %s", replayFile.c_str());
+        LOG(Debug, "[Replay] Parsed {}", replayFile);
         return replayData;
     }
     catch (std::exception& ex) {
-        logger.Write(ERROR, "[Replay] Failed to open %s, exception: %s", replayFile.c_str(), ex.what());
+        LOG(Error, "[Replay] Failed to open {}, exception: {}", replayFile, ex.what());
         return replayData;
     }
 }
@@ -151,7 +151,7 @@ void CReplayData::write(bool pretty) {
     else
         replayFile << replayJson.dump();
 
-    logger.Write(INFO, "[Replay] Written %s", mFileName.c_str());
+    LOG(Info, "[Replay] Written {}", mFileName);
 }
 
 void CReplayData::generateFileName() {

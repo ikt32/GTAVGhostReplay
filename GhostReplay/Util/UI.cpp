@@ -12,11 +12,11 @@ namespace {
     int notificationId = 0;
 
     float GetStringWidth(const std::string& text, float scale, int font) {
-        HUD::_BEGIN_TEXT_COMMAND_GET_WIDTH("STRING");
+        HUD::BEGIN_TEXT_COMMAND_GET_SCREEN_WIDTH_OF_DISPLAY_TEXT("STRING");
         HUD::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(text.c_str());
         HUD::SET_TEXT_FONT(font);
         HUD::SET_TEXT_SCALE(scale, scale);
-        return HUD::_END_TEXT_COMMAND_GET_WIDTH(true);
+        return HUD::END_TEXT_COMMAND_GET_SCREEN_WIDTH_OF_DISPLAY_TEXT(true);
     }
 }
 
@@ -55,7 +55,7 @@ void UI::ShowText(float x, float y, float scale, const std::string& text, int fo
     if (outline) HUD::SET_TEXT_OUTLINE();
     HUD::BEGIN_TEXT_COMMAND_DISPLAY_TEXT("STRING");
     HUD::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(text.c_str());
-    HUD::END_TEXT_COMMAND_DISPLAY_TEXT(x, y, 0);
+    HUD::END_TEXT_COMMAND_DISPLAY_TEXT({ x, y }, 0);
 }
 
 void UI::ShowText(float x, float y, float scale, const std::string& text) {
@@ -79,16 +79,16 @@ std::string UI::GetKeyboardResult() {
 
 void UI::DrawSphere(Vector3 p, float scale, int r, int g, int b, int a) {
     GRAPHICS::DRAW_MARKER(eMarkerType::MarkerTypeDebugSphere,
-                          p.x, p.y, p.z,
-                          0.0f, 0.0f, 0.0f,
-                          0.0f, 0.0f, 0.0f,
-                          scale, scale, scale,
+                          p,
+                          { 0.0f, 0.0f, 0.0f },
+                          { 0.0f, 0.0f, 0.0f },
+                          { scale, scale, scale },
                           r, g, b, a,
                           false, false, 2, false, nullptr, nullptr, false);
 }
 
 void UI::DrawLine(Vector3 pA, Vector3 pB, int r, int g, int b, int a) {
-    GRAPHICS::DRAW_LINE(pA.x, pA.y, pA.z, pB.x, pB.y, pB.z, r, g, b, a);
+    GRAPHICS::DRAW_LINE(pA, pB, r, g, b, a);
 }
 
 void UI::ShowText3D(Vector3 location, float baseSize, const std::vector<std::string>& textLines) {
@@ -98,7 +98,7 @@ void UI::ShowText3D(Vector3 location, float baseSize, const std::vector<std::str
 
     float height = 0.0125f * totalMult;
 
-    GRAPHICS::SET_DRAW_ORIGIN(location.x, location.y, location.z, 0);
+    GRAPHICS::SET_DRAW_ORIGIN(location, 0);
     int i = 0;
 
     float szX = 0.000f;
@@ -111,7 +111,7 @@ void UI::ShowText3D(Vector3 location, float baseSize, const std::vector<std::str
     }
 
     float szY = height * i;
-    GRAPHICS::DRAW_RECT(0.0f + szX / 2.0f, (height * i) / 2.0f, szX, szY,
+    GRAPHICS::DRAW_RECT({ 0.0f + szX / 2.0f, (height * i) / 2.0f }, szX, szY,
         0, 0, 0, 92, 0);
     GRAPHICS::CLEAR_DRAW_ORIGIN();
 }

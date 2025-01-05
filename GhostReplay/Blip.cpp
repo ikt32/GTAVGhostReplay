@@ -3,7 +3,7 @@
 #include <inc/natives.h>
 
 CWrappedBlip::CWrappedBlip(Vector3 pos, eBlipSprite blip, std::string name, eBlipColor color)
-    : mHandle(HUD::ADD_BLIP_FOR_COORD(pos.x, pos.y, pos.z))
+    : mHandle(HUD::ADD_BLIP_FOR_COORD(pos))
     , mEntity(0)
     , mName(name) {
     SetSprite(blip);
@@ -34,7 +34,7 @@ Vector3 CWrappedBlip::GetPosition() const {
 }
 
 void CWrappedBlip::SetPosition(Vector3 coord) {
-    HUD::SET_BLIP_COORDS(mHandle, coord.x, coord.y, coord.z);
+    HUD::SET_BLIP_COORDS(mHandle, coord);
 }
 
 eBlipColor CWrappedBlip::GetColor() const {

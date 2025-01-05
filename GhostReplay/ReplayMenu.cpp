@@ -1190,11 +1190,11 @@ void GhostReplay::CreateReplayVehicle(CReplayData* replay) {
         Vector3 dimMinPlr, dimMaxPlr;
         MISC::GET_MODEL_DIMENSIONS(ENTITY::GET_ENTITY_MODEL(playerVehicle), &dimMinPlr, &dimMaxPlr);
         float offsetRight = dimMaxPlr.x + 1.5f + -dimMinReplay.x;
-        pos = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(playerVehicle, offsetRight, 0.0f, 0.0f);
+        pos = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(playerVehicle, { offsetRight, 0.0f, 0.0f });
     }
     else {
         float offsetRight = 1.5f + -dimMinReplay.x;
-        pos = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(playerPed, offsetRight, 0.0f, 0.0f);
+        pos = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(playerPed, { offsetRight, 0.0f, 0.0f });
     }
 
     Vehicle vehicle = Util::CreateVehicle(replay->VehicleModel, &replay->VehicleMods, pos);
