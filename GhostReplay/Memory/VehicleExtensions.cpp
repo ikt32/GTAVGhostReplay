@@ -238,6 +238,9 @@ void VehicleExtensions::Init() {
     wheelSuspensionCompressionOffset = addr == 0 ? 0 : *(int*)(addr + 8);
     LOGD(wheelSuspensionCompressionOffset == 0 ? Warning : Debug, "Wheel Suspension Compression Offset: 0x{:X}", wheelSuspensionCompressionOffset);
 
+    wheelAngleOffset = addr == 0 ? 0 : (*(int*)(addr + 8)) + 0x8;
+    LOGD(wheelAngleOffset == 0 ? Warning : Debug, "Wheel Angle Offset: 0x{:X}", wheelAngleOffset);
+
     wheelAngularVelocityOffset = addr == 0 ? 0 : (*(int*)(addr + 8)) + 0xc;
     LOGD(wheelAngularVelocityOffset == 0 ? Warning : Debug, "Wheel Angular Velocity Offset: 0x{:X}", wheelAngularVelocityOffset);
 
