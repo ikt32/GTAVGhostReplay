@@ -26,18 +26,39 @@ void from_json(const nlohmann::ordered_json& j, Vector3& vector3) {
     j.at("Z").get_to(vector3.z);
 }
 
-CReplayData CReplayData::Read(const std::string& replayFile) {
+CReplayData CReplayData::Read(const std::filesystem::path& replayFile) {
     CReplayData replayData(replayFile);
 
     nlohmann::ordered_json replayJson;
-    std::ifstream replayFileStream(replayFile.c_str());
+    std::ifstream replayFileStream;
+    if (replayFile.extension().string() == BinExt) {
+        replayFileStream.open(replayFile, std::ios::binary | std::ios::ate);
+    }
+    else {
+        replayFileStream.open(replayFile);
+    }
+
     if (!replayFileStream.is_open()) {
-        LOG(Error, "[Replay] Failed to open {}", replayFile);
+        LOG(Error, "[Replay] Failed to open {}", replayFile.string());
         return replayData;
     }
 
     try {
-        replayFileStream >> replayJson;
+        if (replayFile.extension().string() == BinExt) {
+            std::streamsize size = replayFileStream.tellg();
+            replayFileStream.seekg(0, std::ios::beg);
+            std::vector<uint8_t> binData(size);
+
+            if (!replayFileStream.read(reinterpret_cast<char*>(binData.data()), size)) {
+                LOG(Error, "[Replay] Failed to read {}", replayFile.string());
+                return replayData;
+            }
+
+            replayJson = nlohmann::json::from_msgpack(binData);
+        }
+        else {
+            replayFileStream >> replayJson;
+        }
 
         replayData.Timestamp = replayJson.value("Timestamp", 0ull);
         replayData.Name = replayJson["Name"];
@@ -93,18 +114,18 @@ CReplayData CReplayData::Read(const std::string& replayFile) {
         return replayData;
     }
     catch (std::exception& ex) {
-        LOG(Error, "[Replay] Failed to open {}, exception: {}", replayFile, ex.what());
+        LOG(Error, "[Replay] Failed to open {}, exception: {}", replayFile.string(), ex.what());
         return replayData;
     }
 }
 
-CReplayData::CReplayData(std::string fileName)
+CReplayData::CReplayData(const std::filesystem::path& replayFile)
     : MarkedForDeletion(false)
     , Timestamp(0)
     , VehicleModel(0)
-    , mFileName(std::move(fileName)) {}
+    , mFilePath(replayFile) {}
 
-void CReplayData::write(bool pretty) {
+void CReplayData::write(int storageType) {
     nlohmann::ordered_json replayJson;
 
     replayJson["Timestamp"] = Timestamp;
@@ -144,18 +165,33 @@ void CReplayData::write(bool pretty) {
         replayJson["Nodes"].push_back(node);
     }
 
-    std::ofstream replayFile(mFileName);
 
-    if (pretty)
-        replayFile << std::setw(2) << replayJson << std::endl;
-    else
-        replayFile << replayJson.dump();
+    switch (storageType) {
+        case 0: {
+            std::ofstream replayFile(mFilePath);
+            replayFile << std::setw(2) << replayJson << std::endl;
+            break;
+        }
+        case 1: {
+            std::ofstream replayFile(mFilePath);
+            replayFile << replayJson.dump();
+            break;
+        }
+        case 2:
+            [[fallthrough]];
+        default: {
+            std::ofstream replayFile(mFilePath, std::ios::binary);
+            const std::vector<uint8_t> binData = nlohmann::json::to_msgpack(replayJson);
+            replayFile.write(reinterpret_cast<const char*>(binData.data()), binData.size());
+            replayFile.close();
+        }
+    }
 
-    LOG(Info, "[Replay] Written {}", mFileName);
+    LOG(Info, "[Replay] Written {}", mFilePath.string());
 }
 
-void CReplayData::generateFileName() {
-    const std::string replaysPath =
+void CReplayData::generateFileName(int storageType) {
+    const std::filesystem::path replaysPath =
         Paths::GetModuleFolder(Paths::GetOurModuleHandle()) +
         Constants::ModDir +
         "\\Replays";
@@ -163,8 +199,9 @@ void CReplayData::generateFileName() {
     std::string cleanName = Util::StripString(Name);
     unsigned count = 0;
     std::string suffix;
+    std::string extension = storageType == 2 ? "grbin" : "json";
 
-    while (std::filesystem::exists(std::format("{}\\{}{}.json", replaysPath, cleanName, suffix))) {
+    while (std::filesystem::exists(replaysPath / std::format("{}{}.{}", cleanName, suffix, extension))) {
         if (suffix.empty()) {
             suffix = "_0";
         }
@@ -173,18 +210,18 @@ void CReplayData::generateFileName() {
         }
     }
 
-    mFileName = std::format("{}\\{}{}.json", replaysPath, cleanName, suffix);
+    mFilePath = replaysPath / std::format("{}{}.{}", cleanName, suffix, extension);
 }
 
 void CReplayData::WriteAsync(CReplayData& replayData) {
-    replayData.generateFileName();
-    bool pretty = !GhostReplay::GetSettings().Record.ReduceFileSize;
-    std::thread([replayData, pretty]() {
+    int storageType = GhostReplay::GetSettings().Record.StorageType;
+    replayData.generateFileName(storageType);
+    std::thread([replayData, storageType]() {
         CReplayData myCopy = replayData;
-        myCopy.write(pretty);
+        myCopy.write(storageType);
     }).detach();
 }
 
 void CReplayData::Delete() const {
-    std::filesystem::remove(std::filesystem::path(mFileName));
+    std::filesystem::remove(mFilePath);
 }

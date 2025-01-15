@@ -47,7 +47,7 @@ void CScriptSettings::Load() {
     }
 
     LOAD_VAL("Record", "DeltaMillis", Record.DeltaMillis);
-    LOAD_VAL("Record", "ReduceFileSize", Record.ReduceFileSize);
+    LOAD_VAL("Record", "StorageType", Record.StorageType);
 
     LOAD_VAL("Record", "Optional.Lights", Record.Optional.Lights);
     LOAD_VAL("Record", "Optional.Indicators", Record.Optional.Indicators);
@@ -118,7 +118,7 @@ void CScriptSettings::Save() {
     SAVE_VAL("Record", "AutoGhostAll", Record.AutoGhostAll);
 
     SAVE_VAL("Record", "DeltaMillis", Record.DeltaMillis);
-    SAVE_VAL("Record", "ReduceFileSize", Record.ReduceFileSize);
+    SAVE_VAL("Record", "StorageType", Record.StorageType);
 
     SAVE_VAL("Record", "Optional.Lights", Record.Optional.Lights);
     SAVE_VAL("Record", "Optional.Indicators", Record.Optional.Indicators);

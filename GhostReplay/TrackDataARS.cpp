@@ -8,7 +8,7 @@
 #define VERIFY_NODE(parent, node, name) \
     parent.child((name)); \
     if (!(node)) {\
-        LOG(Error, "[XML {}] Missing node [{}]", (trackFile), (name));\
+        LOG(Error, "[XML {}] Missing node [{}]", (trackFile.string()), (name));\
         goto errorHandling;\
     }
 
@@ -17,11 +17,11 @@ struct Point {
     float w;
 };
 
-CTrackData CTrackData::ReadARS(const std::string& trackFile) {
+CTrackData CTrackData::ReadARS(const std::filesystem::path& trackFile) {
     CTrackData trackData("ARS");
 
     pugi::xml_document trackXml;
-    pugi::xml_parse_result result = trackXml.load_file(trackFile.c_str());
+    pugi::xml_parse_result result = trackXml.load_file(trackFile.string().c_str());
     if (result) {
         auto dataNode = VERIFY_NODE(trackXml, dataNode, "Data");
         auto nameNode = VERIFY_NODE(dataNode, nameNode, "Name");
@@ -94,11 +94,11 @@ CTrackData CTrackData::ReadARS(const std::string& trackFile) {
             trackData.FinishLine.A = ccwFinish;
             trackData.FinishLine.B = cwFinish;
         }
-        LOG(Debug, "[Track-ARS] Parsed {}", trackFile);
+        LOG(Debug, "[Track-ARS] Parsed {}", trackFile.string());
     }
     else {
 errorHandling:
-        LOG(Error, "[Track-ARS] XML [{}] parsed with errors", trackFile);
+        LOG(Error, "[Track-ARS] XML [{}] parsed with errors", trackFile.string());
         LOG(Error, "    Error: {}", result.description());
         LOG(Error, "    Offset: {}", result.offset);
     }

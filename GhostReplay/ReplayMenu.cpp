@@ -57,6 +57,13 @@ namespace GhostReplay {
         { "Sorts by lap time, ascending (fastest first)." },
         { "Sorts by date, ascending (oldest first)." }
     };
+    const std::vector<std::string> fileModeOptions = { "JSON (Pretty)", "JSON (Minified)", "Binary" };
+    const std::vector<std::vector<std::string>> fileModeDescriptions = {
+        { "Saved as text, neatly separated with newlines. Good for editing manually. Uses a massive amount of storage." },
+        { "Saved as text, no newlines. Manual edit possible. Uses a large amount of storage." },
+        { "Saved in binary. Manual edits not trivial. Uses minimal storage." }
+    };
+
 }
 
 std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
@@ -879,10 +886,8 @@ std::vector<CScriptMenu<CReplayScript>::CSubmenu> GhostReplay::BuildMenu() {
             { "Records emergency lights/siren when enabled. Only records on/off, doesn't record fast/slow.",
               "Keep in mind the siren is only audible if the playback vehicle has a driver." });
 
-        mbCtx.BoolOption("Reduce file size", GetSettings().Record.ReduceFileSize,
-            { "Check to save smaller files. Uncheck to save formatted json file, e.g. for inspecting data.",
-              "Saves about 40% when recording each frame at 144Hz.",
-              "Does not affect existing saved files." });
+        mbCtx.StringArray("File mode", fileModeOptions, GetSettings().Record.StorageType,
+                          fileModeDescriptions[GetSettings().Record.StorageType]);
     });
 
     /* mainmenu -> settingsmenu -> advghostsettingsmenu */

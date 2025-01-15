@@ -31,7 +31,8 @@ public:
         bool AutoGhostFast = true;
         bool AutoGhostAll = false;
         int DeltaMillis = 0;
-        bool ReduceFileSize = true;
+        // 0: Json (Pretty), 1: Json (Minified), 2: Binary
+        int StorageType = 2;
         struct {
             bool Lights = false;
             bool Indicators = false;

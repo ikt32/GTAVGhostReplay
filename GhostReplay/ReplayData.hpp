@@ -3,6 +3,7 @@
 #include "ReplayDriver.hpp"
 
 #include <inc/types.h>
+#include <filesystem>
 #include <optional>
 #include <string>
 #include <vector>
@@ -35,11 +36,12 @@ struct SReplayNode {
 
 class CReplayData {
 public:
-    static CReplayData Read(const std::string& replayFile);
+    inline static std::string BinExt = ".grbin";
+    static CReplayData Read(const std::filesystem::path& replayFile);
     static void WriteAsync(CReplayData& replayData);
 
-    CReplayData(std::string fileName);
-    std::string FileName() const { return mFileName; }
+    CReplayData(const std::filesystem::path& replayFile);
+    std::string FileName() const { return mFilePath.string(); }
     void Delete() const;
 
     bool MarkedForDeletion;
@@ -58,9 +60,9 @@ public:
     std::vector<SReplayNode> Nodes;
 private:
     // Make sure mFileName has been set before calling this.
-    void write(bool pretty);
+    void write(int storageType);
     // Only run this before asynchronously calling write().
-    void generateFileName();
+    void generateFileName(int storageType);
 
-    std::string mFileName;
+    std::filesystem::path mFilePath;
 };

@@ -32,7 +32,7 @@ namespace {
     std::atomic_bool stopLoading = false;
     std::atomic<uint32_t> totalReplays = 0;
     std::atomic<uint32_t> loadedReplays = 0;
-    std::vector<std::string> pendingReplays;
+    std::vector<std::filesystem::path> pendingReplays;
 
     std::mutex currentLoadingReplayMutex;
     std::string currentLoadingReplay;
@@ -192,10 +192,11 @@ void GhostReplay::LoadReplays() {
     loadedReplays = 0;
 
     for (const auto& file : fs::directory_iterator(replaysPath)) {
-        if (Util::to_lower(fs::path(file).extension().string()) != ".json") {
+        if (Util::to_lower(fs::path(file).extension().string()) != ".json" &&
+            Util::to_lower(fs::path(file).extension().string()) != ".grbin") {
             continue;
         }
-        pendingReplays.push_back(fs::path(file).string());
+        pendingReplays.push_back(fs::path(file));
         ++totalReplays;
     }
 
@@ -207,7 +208,7 @@ void GhostReplay::LoadReplays() {
 
             {
                 std::lock_guard nameMutex(currentLoadingReplayMutex);
-                currentLoadingReplay = std::filesystem::path(file).stem().string();
+                currentLoadingReplay = file.stem().string();
             }
 
 
@@ -217,7 +218,7 @@ void GhostReplay::LoadReplays() {
                 replays.push_back(std::make_shared<CReplayData>(replay));
             }
             else {
-                LOG(Warning, "[Replay] Skipping [{}] - not a valid file", file);
+                LOG(Warning, "[Replay] Skipping [{}] - not a valid file", file.string());
             }
 
             LOG(Debug, "[Replay] Loaded replay [{}]", replay.Name);
@@ -248,7 +249,8 @@ uint32_t GhostReplay::LoadTracks() {
     }
 
     for (const auto& file : fs::recursive_directory_iterator(tracksPath)) {
-        if (Util::to_lower(fs::path(file).extension().string()) != ".json") {
+        if (Util::to_lower(fs::path(file).extension().string()) != ".json" &&
+            Util::to_lower(fs::path(file).extension().string()) != ".grbin") {
             continue;
         }
 

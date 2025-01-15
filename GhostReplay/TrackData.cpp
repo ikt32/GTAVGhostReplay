@@ -9,13 +9,13 @@
 #include <filesystem>
 #include <fstream>
 
-CTrackData CTrackData::Read(const std::string& trackFile) {
+CTrackData CTrackData::Read(const std::filesystem::path& trackFile) {
     CTrackData trackData(trackFile);
 
     nlohmann::json trackJson;
-    std::ifstream replayFileStream(trackFile.c_str());
+    std::ifstream replayFileStream(trackFile);
     if (!replayFileStream.is_open()) {
-        LOG(Error, "[Track] Failed to open {}", trackFile);
+        LOG(Error, "[Track] Failed to open {}", trackFile.string());
         return trackData;
     }
 
@@ -45,16 +45,16 @@ CTrackData CTrackData::Read(const std::string& trackFile) {
         return trackData;
     }
     catch (std::exception& ex) {
-        LOG(Error, "[Track] Failed to open {}, exception: {}", trackFile, ex.what());
+        LOG(Error, "[Track] Failed to open {}, exception: {}", trackFile.string(), ex.what());
         return trackData;
     }
 }
 
-CTrackData::CTrackData(std::string fileName)
+CTrackData::CTrackData(const std::filesystem::path& fileName)
     : MarkedForDeletion(false)
     , StartLine(SLineDef{})
     , FinishLine(SLineDef{})
-    , mFileName(std::move(fileName)) {
+    , mFilePath(fileName) {
 }
 
 void CTrackData::Write() {
@@ -90,9 +90,9 @@ void CTrackData::Write() {
     trackFile << std::setw(2) << trackJson << std::endl;
 
     LOG(Info, "[Track] Written {}", trackFileName);
-    mFileName = trackFileName;
+    mFilePath = trackFileName;
 }
 
 void CTrackData::Delete() const {
-    std::filesystem::remove(std::filesystem::path(mFileName));
+    std::filesystem::remove(mFilePath);
 }

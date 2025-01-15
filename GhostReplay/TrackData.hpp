@@ -1,5 +1,6 @@
 #pragma once
 #include <inc/types.h>
+#include <filesystem>
 #include <string>
 
 struct SLineDef {
@@ -9,13 +10,13 @@ struct SLineDef {
 
 class CTrackData {
 public:
-    static CTrackData Read(const std::string& trackFile);
-    static CTrackData ReadARS(const std::string& trackFile);
+    static CTrackData Read(const std::filesystem::path& trackFile);
+    static CTrackData ReadARS(const std::filesystem::path& trackFile);
 
-    CTrackData(std::string fileName);
+    CTrackData(const std::filesystem::path& fileName);
     void Write();
     void Delete() const;
-    std::string FileName() const { return mFileName; }
+    std::string FileName() const { return mFilePath.string(); }
 
     bool MarkedForDeletion;
 
@@ -24,6 +25,6 @@ public:
     SLineDef StartLine;
     SLineDef FinishLine;
 private:
-    std::string mFileName;
+    std::filesystem::path mFilePath;
 };
 
