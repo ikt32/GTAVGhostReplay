@@ -322,7 +322,7 @@ uint32_t GhostReplay::LoadARSTracks() {
     arsTracks.clear();
 
     if (!(fs::exists(fs::path(tracksPath)) && fs::is_directory(fs::path(tracksPath)))) {
-        LOG(Error, "[Track-ARS] Directory [{}] not found!", tracksPath);
+        LOG(Debug, "[Track-ARS] Directory [{}] not found!", tracksPath);
         return 0;
     }
 
