@@ -12,6 +12,59 @@
 #include <thread>
 #include <utility>
 
+using TKeyMap = std::unordered_map<std::string, std::string>;
+
+namespace {
+const TKeyMap sKeyMap{
+    { "Pos", "P" },
+    { "Rot", "R" },
+    { "WheelRotations", "W" },
+    { "SuspensionCompressions", "s" },
+    { "Steering", "S" },
+    { "Throttle", "t" },
+    { "Brake", "B" },
+    { "Gear", "G" },
+    { "RPM", "r" },
+    { "LowBeams", "h" },
+    { "HighBeams", "H" },
+    { "IndicatorLeft", "i" },
+    { "IndicatorRight", "I" },
+    { "Siren", "e" },
+    { "Roof", "f" },
+};
+
+TKeyMap ReverseKeyMap(const TKeyMap& keyMap) {
+    TKeyMap reversed;
+    for (const auto& [key, val] : keyMap) {
+        reversed[val] = key;
+    }
+    return reversed;
+}
+
+const TKeyMap sKeyMapReverse = ReverseKeyMap(sKeyMap);
+
+nlohmann::json ApplyMap(const nlohmann::json& input, const TKeyMap& map) {
+    nlohmann::json result;
+    if (input.is_object()) {
+        for (auto it = input.begin(); it != input.end(); ++it) {
+            auto key = it.key();
+            auto value = it.value();
+            std::string alias = map.count(key) ? map.at(key) : key;
+            result[alias] = ApplyMap(value, map);
+        }
+    }
+    else if (input.is_array()) {
+        for (const auto& element : input) {
+            result.push_back(ApplyMap(element, map));
+        }
+    }
+    else {
+        result = input;
+    }
+    return result;
+}
+}
+
 void to_json(nlohmann::ordered_json& j, const Vector3& vector3) {
     j = nlohmann::ordered_json{
         { "X", vector3.x },
@@ -55,6 +108,7 @@ CReplayData CReplayData::Read(const std::filesystem::path& replayFile) {
             }
 
             replayJson = nlohmann::json::from_msgpack(binData);
+            replayJson = ApplyMap(replayJson, sKeyMapReverse);
         }
         else {
             replayFileStream >> replayJson;
@@ -180,6 +234,7 @@ void CReplayData::write(int storageType) {
         case 2:
             [[fallthrough]];
         default: {
+            replayJson = ApplyMap(replayJson, sKeyMap);
             std::ofstream replayFile(mFilePath, std::ios::binary);
             const std::vector<uint8_t> binData = nlohmann::json::to_msgpack(replayJson);
             replayFile.write(reinterpret_cast<const char*>(binData.data()), binData.size());
