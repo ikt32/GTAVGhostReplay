@@ -58,17 +58,8 @@ void Impacts::Setup() {
         "48 89 70 18 48 89 78 20 41 56 "
         "48 83 EC 20 48 8B EA 4C 8B F1 E8 ? ? ? ? 33 DB"));
 
-    if (!fnAddr) {
-        // TODO: Update actual pattern
-        LOG(Info, "Couldn't find pre-b2944 ShouldFindImpacts");
-        fnAddr = reinterpret_cast<void*>(mem::FindPattern(
-            "48 8B C4 48 89 58 08 48 89 68 10 "
-            "48 89 70 18 48 89 78 20 41 56 "
-            "48 83 EC 20 48 8B EA 4C 8B F1 E8 ? ? ? ? 33 DB"));
-    }
-
-    if (!fnAddr) {
-        LOG(Error, "Couldn't find ShouldFindImpacts definitively");
+    if (fnAddr == 0) {
+        LOG(Error, "Couldn't find ShouldFindImpacts");
         return;
     }
     LOG(Debug, "Found ShouldFindImpacts at 0x{:X}", fnAddr);

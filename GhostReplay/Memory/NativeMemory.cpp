@@ -95,29 +95,58 @@ namespace mem {
         return addresses;
     }
 
-    uintptr_t FindPattern(const char* pattStr) {
-        std::vector<std::string> bytesStr = split(pattStr, ' ');
+    uintptr_t FindPattern(const std::vector<uint8_t>& pattern_bytes, const std::string& mask) {
+        MODULEINFO mod_info;
+        if (!GetModuleInformation(GetCurrentProcess(), GetModuleHandle(nullptr), &mod_info, sizeof(mod_info))) {
+            return 0;
+        }
 
-        MODULEINFO modInfo{};
-        GetModuleInformation(GetCurrentProcess(), GetModuleHandle(nullptr), &modInfo, sizeof(MODULEINFO));
+        uintptr_t base_address = reinterpret_cast<uintptr_t>(mod_info.lpBaseOfDll);
+        size_t module_size = mod_info.SizeOfImage;
 
-        auto* start_offset = static_cast<uint8_t*>(modInfo.lpBaseOfDll);
-        const auto size = static_cast<uintptr_t>(modInfo.SizeOfImage);
+        for (size_t offset = 0; offset < module_size - pattern_bytes.size(); ++offset) {
+            bool found = true;
 
-        uintptr_t pos = 0;
-        const uintptr_t searchLen = bytesStr.size();
-
-        for (auto* retAddress = start_offset; retAddress < start_offset + size; retAddress++) {
-            if (bytesStr[pos] == "??" || bytesStr[pos] == "?" ||
-                *retAddress == static_cast<uint8_t>(std::strtoul(bytesStr[pos].c_str(), nullptr, 16))) {
-                if (pos + 1 == bytesStr.size())
-                    return (reinterpret_cast<uintptr_t>(retAddress) - searchLen + 1);
-                pos++;
+            for (size_t j = 0; j < pattern_bytes.size(); ++j) {
+                if (mask[j] == 'x' && pattern_bytes[j] != *reinterpret_cast<uint8_t*>(base_address + offset + j)) {
+                    found = false;
+                    break;
+                }
             }
-            else {
-                pos = 0;
+
+            if (found) {
+                return base_address + offset;
             }
         }
+
         return 0;
+    }
+
+    uintptr_t FindPattern(const std::string& pattern) {
+        std::vector<uint8_t> pattern_bytes;
+        std::string mask;
+
+        size_t i = 0;
+        while (i < pattern.size()) {
+            if (pattern[i] == '?') {
+                pattern_bytes.push_back(0);
+                mask += '?';
+
+                // Handle ??
+                if (i + 1 < pattern.size() && pattern[i + 1] == '?') {
+                    i++;
+                }
+            }
+            else if (isxdigit(pattern[i]) && i + 1 < pattern.size() && isxdigit(pattern[i + 1])) {
+                 // Convert hex string to byte
+                std::string byte_str = pattern.substr(i, 2);
+                pattern_bytes.push_back(static_cast<uint8_t>(std::strtoul(byte_str.c_str(), nullptr, 16)));
+                mask += 'x';
+                i++;  // Skip next character since we processed two
+            }
+            i++;
+        }
+
+        return FindPattern(pattern_bytes, mask);
     }
 }
